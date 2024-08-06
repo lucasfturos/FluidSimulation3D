@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../Common/perlin.hpp"
-#include "../GLObjects/Texture/texture.hpp"
 #include "../GLObjects/index_buffer.hpp"
 #include "../GLObjects/shader.hpp"
 #include "../GLObjects/vertex_array.hpp"
@@ -22,7 +21,7 @@ class Fluid {
         float dt;
     };
 
-    const int N = 270;
+    const int N = 40;
     const int nSize = N * N * N;
 
   private:
@@ -44,6 +43,8 @@ class Fluid {
     std::shared_ptr<VertexBuffer> vb;
 
     void loadParams(const std::string &);
+    void drawDensity();
+    void draw();
 
     // Logic
     void step();

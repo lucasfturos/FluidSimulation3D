@@ -1,7 +1,7 @@
 {
     "iter": 16,
-    "scale": 4,
-    "diffusion": 1.0e-5,
+    "scale": 8,
+    "diffusion": 1.0e-10,
     "viscosity": 1.0e-6,
     "dt": 0.1
 }

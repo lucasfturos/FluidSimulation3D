@@ -1,12 +1,10 @@
 # -------------------------------------------------------------------
 
 set(GLOBJECTS_HEADERS
-    Texture/texture.hpp
     VertexBufferLayout/vertex_buffer_layout.hpp
 )
 
 set(GLOBJECTS_SOURCES
-    Texture/texture.cpp
     VertexBufferLayout/vertex_buffer_layout.cpp
 )
 

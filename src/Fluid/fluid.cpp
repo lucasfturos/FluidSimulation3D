@@ -1,4 +1,5 @@
 #include "fluid.hpp"
+#include "../Common/color.hpp"
 #include "../Objects/cube.hpp"
 #include <jsoncpp/json/json.h>
 
@@ -28,6 +29,24 @@ void Fluid::loadParams(const std::string &filename) {
     };
 }
 
+void Fluid::drawDensity() {
+    int scale = params.scale;
+    std::vector<glm::vec3> colors(nSize);
+    for (int k = 0; k < N; ++k) {
+        for (int j = 0; j < N; ++j) {
+            for (int i = 0; i < N; ++i) {
+                int x = i * scale;
+                int y = j * scale;
+                int z = k * scale;
+                int index = IX(x, y, z);
+                float d = density[index];
+                colors[index] = getColorByValue(std::fmod((d + 50), 255.0f),
+                                                100 / 255.0f, d / 255.0f);
+            }
+        }
+    }
+}
+
 void Fluid::setup() {
     va = std::make_shared<VertexArray>();
     vb = std::make_shared<VertexBuffer>(cubeVertices);
@@ -41,13 +60,35 @@ void Fluid::setup() {
 }
 
 void Fluid::run() {
+    // static float time = 0.0f;
+    // step();
+
+    // std::random_device rd;
+    // std::mt19937 gen(rd());
+    // std::uniform_int_distribution<> dis(50.0f, 350.0f);
+
+    // for (int x = 0; x < N; ++x) {
+    //     for (int y = 0; y < N; ++y) {
+    //         for (int z = 0; z < N; ++z) {
+    //             addDensity(glm::vec3(x, y, z), dis(gen));
+    //             addVelocity(glm::vec3(x, y, z), glm::vec3(1.0f, 1.0f, 1.0f));
+    //             addTurbulence(glm::vec3(x, y, z), time,
+    //                           glm::vec3(1.0f, 1.0f, 1.0f));
+    //             time += 0.01;
+    //         }
+    //     }
+    // }
+
+    // drawDensity();
+
     shader->bind();
+
     glm::mat4 model = glm::mat4(1.0f);
 
     glm::vec3 translation(-8.0f, 0.0f, 0.0f);
     model = glm::translate(model, translation);
 
-    float scaleFactor = 2.0f;
+    float scaleFactor = 3.0f;
     glm::vec3 scale(scaleFactor);
     model = glm::scale(model, scale);
 
