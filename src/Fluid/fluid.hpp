@@ -1,6 +1,11 @@
 #pragma once
 
 #include "../Common/perlin.hpp"
+#include "../GLObjects/Texture/texture.hpp"
+#include "../GLObjects/index_buffer.hpp"
+#include "../GLObjects/shader.hpp"
+#include "../GLObjects/vertex_array.hpp"
+
 #include <algorithm>
 #include <fstream>
 #include <glm/glm.hpp>
@@ -18,7 +23,7 @@ class Fluid {
     };
 
     const int N = 270;
-    const int nSize = N * N;
+    const int nSize = N * N * N;
 
   private:
     std::shared_ptr<Perlin> perlin;
@@ -26,14 +31,19 @@ class Fluid {
     std::vector<float> density;
     std::vector<float> Vx, Vy, Vz;
     std::vector<float> Vx0, Vy0, Vz0;
+    float t;
+
+    std::shared_ptr<Shader> shader;
+    glm::mat4 viewMat;
+    glm::mat4 projMat;
 
   private:
     SimulationParameters params;
 
-    void loadParams(const std::string &);
+    std::shared_ptr<VertexArray> va;
+    std::shared_ptr<VertexBuffer> vb;
 
-    // Draw
-    void draw();
+    void loadParams(const std::string &);
 
     // Logic
     void step();
@@ -57,8 +67,10 @@ class Fluid {
                  float);
 
   public:
-    Fluid();
+    Fluid(glm::mat4, glm::mat4);
 
     void setFilename(const std::string &);
+    void setTime(float);
+    void setup();
     void run();
 };

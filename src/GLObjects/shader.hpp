@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <sstream>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -28,6 +29,11 @@ class Shader {
 
     void bind() const { glUseProgram(m_bufferID); }
     void unbind() const { glUseProgram(0); }
+
+    void setUniform1i(const std::string &name, GLint value) {
+        GLint location = getUniformLocation(name);
+        glUniform1i(location, value);
+    }
 
     void setUniform3f(const std::string &name, glm::vec3 value) {
         GLint location = getUniformLocation(name);
