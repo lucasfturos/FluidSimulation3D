@@ -16,13 +16,12 @@ class Fluid {
   protected:
     struct SimulationParameters {
         int iter;
-        int scale;
         float diffusion;
         float viscosity;
         float dt;
     };
 
-    const int N = 10;
+    const int N = 25;
     const int nSize = N * N * N;
 
   private:

@@ -14,12 +14,12 @@ Render::Render()
 Render::~Render() { destroyWindow(); }
 
 void Render::setup() {
-    objects->setup();
+    // objects->setup();
     fluid->setup();
 }
 
 void Render::draw() {
-    objects->run();
+    // objects->run();
     fluid->run();
 }
 

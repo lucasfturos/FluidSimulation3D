@@ -7,4 +7,5 @@ Feito em C++, OpenGL e SDL2.
 
 ## Reference
 
-1. [Fluid Simulation for Dummies - Mike Ash](https://mikeash.com/pyblog/fluid-simulation-for-dummies.html)
+1. [Distance Functions - Inigo Quilez](https://iquilezles.org/articles/distfunctions/)
+2. [Fluid Simulation for Dummies - Mike Ash](https://mikeash.com/pyblog/fluid-simulation-for-dummies.html)

@@ -6,7 +6,7 @@
 Fluid::Fluid(glm::mat4 view, glm::mat4 projection)
     : perlin(std::make_shared<Perlin>()), s(nSize, 0.0f), density(nSize, 0.0f),
       Vx(nSize, 0.0f), Vy(nSize, 0.0f), Vz(nSize, 0.0f), Vx0(nSize, 0.0f),
-      Vy0(nSize, 0.0f), Vz0(nSize, 0.0f), colors(nSize, 0.0f), t(0.0f),
+      Vy0(nSize, 0.0f), Vz0(nSize, 0.0f), colors(nSize * 3, 0.0f), t(0.0f),
       viewMat(view), projMat(projection) {}
 
 void Fluid::setFilename(const std::string &filename) { loadParams(filename); }
@@ -22,7 +22,6 @@ void Fluid::loadParams(const std::string &filename) {
     file >> root;
     params = {
         .iter = root.get("iter", 16).asInt(),
-        .scale = root.get("scale", 8).asInt(),
         .diffusion = root.get("diffusion", 1.0e-5).asFloat(),
         .viscosity = root.get("viscosity", 1.0e-6).asFloat(),
         .dt = root.get("dt", 0.01).asFloat(),
@@ -30,20 +29,20 @@ void Fluid::loadParams(const std::string &filename) {
 }
 
 void Fluid::drawDensity() {
-    int scale = params.scale;
     colors.clear();
-    for (const auto &vertex : cubeVertices) {
-        int x = static_cast<int>(vertex.x) * scale;
-        int y = static_cast<int>(vertex.y) * scale;
-        int z = static_cast<int>(vertex.z) * scale;
-
-        int index = IX(x, y, z);
-        float d = density[index];
-        glm::vec3 color = getColorByValue(std::fmod((d + 100), 255.0f),
-                                          200 / 255.0f, 200 / 255.0f);
-        colors.push_back(color.r);
-        colors.push_back(color.g);
-        colors.push_back(color.b);
+    for (int z = 0; z < N; ++z) {
+        for (int y = 0; y < N; ++y) {
+            for (int x = 0; x < N; ++x) {
+                int index = IX(x, y, z);
+                float d = density[index];
+                auto color = getColorByValue(std::fmod((d + 50), 255.0f),
+                                             200 / 255.0f, d / 255.0f);
+                int colorIndex = index * 3;
+                colors[colorIndex + 0] = color.r;
+                colors[colorIndex + 1] = color.g;
+                colors[colorIndex + 2] = color.b;
+            }
+        }
     }
 
     texture->updateData(colors, N, N, N, GL_RGB, GL_FLOAT);
@@ -67,40 +66,52 @@ void Fluid::setup() {
 }
 
 void Fluid::run() {
-    static float time = 0.0f;
     step();
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(50.0f, 350.0f);
+    std::uniform_int_distribution<> dis(50, 350);
 
     for (const auto &vertex : cubeVertices) {
-        for (int i = 0; i < 6; ++i) {
-            addDensity(vertex, dis(gen));
+        for (int i = -1; i <= 1; ++i) {
+            for (int j = -1; j <= 1; ++j) {
+                for (int k = -1; k <= 1; ++k) {
+                    addDensity(
+                        {
+                            vertex.x + i,
+                            vertex.y + j,
+                            vertex.z + k,
+                        },
+                        dis(gen));
+                }
+            }
         }
 
-        for (int i = 0; i < 6; ++i) {
-            float angle = 2 * M_PI;
+        float noiseScale = 0.2f;
+        for (auto i = 0; i < 8; ++i) {
+            float noiseValue = perlin->noise({
+                vertex.x * noiseScale,
+                vertex.y * noiseScale,
+                vertex.z * noiseScale,
+            });
+            float angle = noiseValue * 2.0f * M_PI;
             float vX = std::cos(angle) * 0.1f;
             float vY = std::sin(angle) * 0.1f;
-            addVelocity(vertex, glm::vec3(vX, vY, std::atan(vY / vX)));
-            addTurbulence(vertex, time, glm::vec3(vX, vY, std::atan(vY / vX)));
-            time += 0.01;
+            addVelocity(vertex, {vX, vY, 1.0f});
+            addTurbulence(vertex, t, {vX, vY, 1.0f});
         }
     }
 
     drawDensity();
-
     fadeDensity();
 
     shader->bind();
 
     glm::mat4 model = glm::mat4(1.0f);
-
-    glm::vec3 translation(-8.0f, 0.0f, 0.0f);
+    glm::vec3 translation(0.0f, 0.0f, 0.0f);
     model = glm::translate(model, translation);
 
-    float scaleFactor = 3.0f;
+    float scaleFactor = 5.0f;
     glm::vec3 scale(scaleFactor);
     model = glm::scale(model, scale);
 
@@ -109,14 +120,13 @@ void Fluid::run() {
         glm::rotate(glm::mat4(1.0f), angle, glm::vec3(1.0f, 1.0f, 0.0f));
 
     glm::mat4 mvp = projMat * viewMat * model * rotationMatrix;
-
     shader->setUniformMat4f("uMVP", mvp);
 
     va->bind();
     vb->bind();
     ib->bind();
-    texture->bind();
-    
+    texture->bind(0);
+
     glDrawElements(GL_TRIANGLES, cubeIndices.size(), GL_UNSIGNED_INT, nullptr);
 
     va->unbind();
