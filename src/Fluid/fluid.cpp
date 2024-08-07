@@ -6,8 +6,8 @@
 Fluid::Fluid(glm::mat4 view, glm::mat4 projection)
     : perlin(std::make_shared<Perlin>()), s(nSize, 0.0f), density(nSize, 0.0f),
       Vx(nSize, 0.0f), Vy(nSize, 0.0f), Vz(nSize, 0.0f), Vx0(nSize, 0.0f),
-      Vy0(nSize, 0.0f), Vz0(nSize, 0.0f), t(0.0f), viewMat(view),
-      projMat(projection) {}
+      Vy0(nSize, 0.0f), Vz0(nSize, 0.0f), colors(nSize, 0.0f), t(0.0f),
+      viewMat(view), projMat(projection) {}
 
 void Fluid::setFilename(const std::string &filename) { loadParams(filename); }
 
@@ -31,25 +31,28 @@ void Fluid::loadParams(const std::string &filename) {
 
 void Fluid::drawDensity() {
     int scale = params.scale;
-    std::vector<glm::vec3> colors(nSize);
-    for (int k = 0; k < N; ++k) {
-        for (int j = 0; j < N; ++j) {
-            for (int i = 0; i < N; ++i) {
-                int x = i * scale;
-                int y = j * scale;
-                int z = k * scale;
-                int index = IX(x, y, z);
-                float d = density[index];
-                colors[index] = getColorByValue(std::fmod((d + 50), 255.0f),
-                                                100 / 255.0f, d / 255.0f);
-            }
-        }
+    colors.clear();
+    for (const auto &vertex : cubeVertices) {
+        int x = static_cast<int>(vertex.x) * scale;
+        int y = static_cast<int>(vertex.y) * scale;
+        int z = static_cast<int>(vertex.z) * scale;
+
+        int index = IX(x, y, z);
+        float d = density[index];
+        glm::vec3 color = getColorByValue(std::fmod((d + 100), 255.0f),
+                                          200 / 255.0f, 200 / 255.0f);
+        colors.push_back(color.r);
+        colors.push_back(color.g);
+        colors.push_back(color.b);
     }
+
+    texture->updateData(colors, N, N, N, GL_RGB, GL_FLOAT);
 }
 
 void Fluid::setup() {
     va = std::make_shared<VertexArray>();
     vb = std::make_shared<VertexBuffer>(cubeVertices);
+    ib = std::make_shared<IndexBuffer>(cubeIndices);
 
     VertexBufferLayout layout;
     layout.push<GLfloat>(3);
@@ -57,29 +60,38 @@ void Fluid::setup() {
     va->addBuffer(*vb, layout);
 
     shader = std::make_shared<Shader>("assets/shader/fluid.shader");
+
+    texture = std::make_shared<Texture>(N, N, N, GL_RGB, GL_FLOAT);
+    shader->bind();
+    shader->setUniform1i("densityTex", 0);
 }
 
 void Fluid::run() {
-    // static float time = 0.0f;
-    // step();
+    static float time = 0.0f;
+    step();
 
-    // std::random_device rd;
-    // std::mt19937 gen(rd());
-    // std::uniform_int_distribution<> dis(50.0f, 350.0f);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(50.0f, 350.0f);
 
-    // for (int x = 0; x < N; ++x) {
-    //     for (int y = 0; y < N; ++y) {
-    //         for (int z = 0; z < N; ++z) {
-    //             addDensity(glm::vec3(x, y, z), dis(gen));
-    //             addVelocity(glm::vec3(x, y, z), glm::vec3(1.0f, 1.0f, 1.0f));
-    //             addTurbulence(glm::vec3(x, y, z), time,
-    //                           glm::vec3(1.0f, 1.0f, 1.0f));
-    //             time += 0.01;
-    //         }
-    //     }
-    // }
+    for (const auto &vertex : cubeVertices) {
+        for (int i = 0; i < 6; ++i) {
+            addDensity(vertex, dis(gen));
+        }
 
-    // drawDensity();
+        for (int i = 0; i < 6; ++i) {
+            float angle = 2 * M_PI;
+            float vX = std::cos(angle) * 0.1f;
+            float vY = std::sin(angle) * 0.1f;
+            addVelocity(vertex, glm::vec3(vX, vY, std::atan(vY / vX)));
+            addTurbulence(vertex, time, glm::vec3(vX, vY, std::atan(vY / vX)));
+            time += 0.01;
+        }
+    }
+
+    drawDensity();
+
+    fadeDensity();
 
     shader->bind();
 
@@ -102,10 +114,14 @@ void Fluid::run() {
 
     va->bind();
     vb->bind();
-
-    glDrawArrays(GL_TRIANGLES, 0, cubeVertices.size());
+    ib->bind();
+    texture->bind();
+    
+    glDrawElements(GL_TRIANGLES, cubeIndices.size(), GL_UNSIGNED_INT, nullptr);
 
     va->unbind();
     vb->unbind();
+    ib->unbind();
     shader->unbind();
+    texture->unbind();
 }

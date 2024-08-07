@@ -45,11 +45,13 @@ void Objects::run() {
     shader->setUniformMat4f("uMVP", mvp);
 
     va->bind();
+    vb->bind();
     ib->bind();
 
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 
-    ib->unbind();
     va->unbind();
+    vb->unbind();
+    ib->unbind();
     shader->unbind();
 }

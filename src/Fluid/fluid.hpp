@@ -3,6 +3,7 @@
 #include "../Common/perlin.hpp"
 #include "../GLObjects/index_buffer.hpp"
 #include "../GLObjects/shader.hpp"
+#include "../GLObjects/texture.hpp"
 #include "../GLObjects/vertex_array.hpp"
 
 #include <algorithm>
@@ -21,7 +22,7 @@ class Fluid {
         float dt;
     };
 
-    const int N = 40;
+    const int N = 10;
     const int nSize = N * N * N;
 
   private:
@@ -30,6 +31,7 @@ class Fluid {
     std::vector<float> density;
     std::vector<float> Vx, Vy, Vz;
     std::vector<float> Vx0, Vy0, Vz0;
+    std::vector<float> colors;
     float t;
 
     std::shared_ptr<Shader> shader;
@@ -41,6 +43,8 @@ class Fluid {
 
     std::shared_ptr<VertexArray> va;
     std::shared_ptr<VertexBuffer> vb;
+    std::shared_ptr<IndexBuffer> ib;
+    std::shared_ptr<Texture> texture;
 
     void loadParams(const std::string &);
     void drawDensity();
