@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <fstream>
 #include <glm/glm.hpp>
+#include <jsoncpp/json/json.h>
 #include <memory>
 #include <vector>
 

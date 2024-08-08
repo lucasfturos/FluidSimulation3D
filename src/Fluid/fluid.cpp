@@ -1,7 +1,6 @@
 #include "fluid.hpp"
 #include "../Common/color.hpp"
 #include "../Objects/cube.hpp"
-#include <jsoncpp/json/json.h>
 
 Fluid::Fluid(glm::mat4 view, glm::mat4 projection)
     : perlin(std::make_shared<Perlin>()), s(nSize, 0.0f), density(nSize, 0.0f),
@@ -111,13 +110,12 @@ void Fluid::run() {
     glm::vec3 translation(0.0f, 0.0f, 0.0f);
     model = glm::translate(model, translation);
 
-    float scaleFactor = 5.0f;
-    glm::vec3 scale(scaleFactor);
+    glm::vec3 scale(5.0f);
     model = glm::scale(model, scale);
 
-    float angle = t * glm::radians(90.0f);
+    float angle = t * glm::radians(45.0f);
     glm::mat4 rotationMatrix =
-        glm::rotate(glm::mat4(1.0f), angle, glm::vec3(1.0f, 1.0f, 0.0f));
+        glm::rotate(glm::mat4(1.0f), angle, {1.0f, 1.0f, 0.0f});
 
     glm::mat4 mvp = projMat * viewMat * model * rotationMatrix;
     shader->setUniformMat4f("uMVP", mvp);

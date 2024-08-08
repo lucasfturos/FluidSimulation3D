@@ -14,55 +14,44 @@ void main() {
 #shader fragment
 #version 330 core
 
+#define STEPS 64
+#define STEP_SIZE 1.0e-3
+#define EPS 1.0e-6
+#define MAX_DIST 100.0
+
 in vec3 TexCoords;
 out vec4 color;
 
 uniform sampler3D densityTex;
-uniform float iTime;
-
-float sdBox(vec3 p) {
-    vec3 d = abs(p) - vec3(1.0);
-    return length(max(d, 0.0)) + min(max(d.x, max(d.y, d.z)), 0.0);
-}
-
-float opSmoothUnion(float d1, float d2, float k) {
-    float h = clamp(0.5 + 0.5 * (d2 - d1) / k, 0.0, 1.0);
-    return mix(d2, d1, h) - k * h * (1.0 - h);
-}
 
 float sdFluid(vec3 p) { return texture(densityTex, p).r - 0.5; }
 
-float QueryVolumetricDistanceField(vec3 pos) {
-    float sdfBox = sdBox(pos);
-    float sdfFluid = sdFluid(pos);
-    return opSmoothUnion(sdfBox, sdfFluid, 0.4);
+bool rayMarchHit(vec3 pos, vec3 direction, out vec3 hitPos) {
+    float t = 0.0;
+
+    for (int i = 0; i < STEPS; ++i) {
+        vec3 p = pos + t * direction;
+        float d = sdFluid(p);
+        if (d < EPS) {
+            hitPos = p;
+            return true;
+        }
+
+        t += d * STEP_SIZE;
+        if (t > MAX_DIST) {
+            break;
+        }
+    }
+    return false;
 }
 
 void main() {
     vec3 rayOrigin = TexCoords;
     vec3 rayDirection = normalize(vec3(0.0, 0.0, -1.0));
+    vec3 hitPos;
 
-    float t = 0.0;
-    const float maxDistance = 20.0;
-    const float epsilon = 1.0e-6;
-    const int maxSteps = 100;
-    const float k = 0.4;
-
-    for (int i = 0; i < maxSteps; ++i) {
-        vec3 p = rayOrigin + t * rayDirection;
-
-        float d = QueryVolumetricDistanceField(p);
-
-        if (d < epsilon) {
-            vec3 densityColor = texture(densityTex, p).rgb;
-            color = vec4(densityColor, 1.0);
-            return;
-        }
-        t += d;
-        if (t > maxDistance) {
-            break;
-        }
+    if (rayMarchHit(rayOrigin, rayDirection, hitPos)) {
+        vec3 densityColor = texture(densityTex, hitPos).rgb;
+        color = vec4(densityColor, 1.0);
     }
-
-    color = vec4(0.0, 0.0, 0.0, 0.0);
 }
