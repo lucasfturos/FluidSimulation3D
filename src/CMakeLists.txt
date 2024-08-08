@@ -1,6 +1,13 @@
 # -------------------------------------------------------------------
 
+cmake_minimum_required(VERSION 3.4...3.25 FATAL_ERROR)
+
+# -------------------------------------------------------------------
+
 set(SRC_HEADER
+    # Common
+    Common/color.hpp
+    Common/perlin.hpp
     # Fluid
     Fluid/fluid.hpp
     # Objects
@@ -41,15 +48,19 @@ target_include_directories(${PROJECT_NAME}
     PRIVATE ${JSONCPP_INCLUDE_DIRS}
     PRIVATE ${SDL2_INCLUDE_DIRS}
     PRIVATE ${OPENGL_INCLUDE_DIRS}
+        PRIVATE Common
+    PRIVATE Objects
+    PRIVATE GLObjects
 )
 
 target_link_libraries(${PROJECT_NAME} 
+    PRIVATE External_lib
     PRIVATE GLObjects_lib
 )
 
 target_link_libraries(${PROJECT_NAME}
     # Jsoncpp
-    PRIVATE ${JSONCPP_LIBRARIES}
+    PRIVATE jsoncpp
     # SDL2
     PRIVATE ${SDL2_LIBRARIES}
     # OpenGL
