@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Common/util.hpp"
 #include "../GLObjects/index_buffer.hpp"
 #include "../GLObjects/shader.hpp"
 #include "../GLObjects/vertex_array.hpp"
@@ -7,13 +8,6 @@
 #include "../Objects/sphere.hpp"
 
 #include <memory>
-
-enum class ObjectType {
-    Sphere,
-    Cylinder,
-    Plane,
-    Cube,
-};
 
 class Objects {
   private:

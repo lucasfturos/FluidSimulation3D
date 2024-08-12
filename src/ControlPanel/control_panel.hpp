@@ -9,7 +9,7 @@ class ControlPanel {
     const int height = 200;
 
   private:
-    SimulationParameters params;
+    SimulationParams params;
 
     // GUI
     void initFont();
@@ -18,7 +18,7 @@ class ControlPanel {
   public:
     ControlPanel();
 
-    SimulationParameters getSimulationParams();
+    SimulationParams getSimulationParams();
     void setup();
     void run();
 };

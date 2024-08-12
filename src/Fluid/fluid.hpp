@@ -32,7 +32,7 @@ class Fluid {
     glm::mat4 projMat;
 
   private:
-    SimulationParameters params;
+    SimulationParams params;
 
     std::shared_ptr<VertexArray> va;
     std::shared_ptr<VertexBuffer> vb;
@@ -69,7 +69,7 @@ class Fluid {
 
     void setFilename(const std::string &);
     void setTime(float);
-    void setSimulationParams(SimulationParameters);
+    void setSimulationParams(SimulationParams);
     void setup();
     void run();
 };
