@@ -1,3 +1,5 @@
+#include "../../external/imgui/backends/imgui_impl_opengl3.h"
+#include "../../external/imgui/backends/imgui_impl_sdl2.h"
 #include "render.hpp"
 
 void Render::clear() {
@@ -12,6 +14,17 @@ void Render::initOpenGL() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glMatrixMode(GL_PROJECTION);
+}
+
+void Render::setupImGui() {
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
+    ImGui::StyleColorsDark();
+
+    ImGui_ImplSDL2_InitForOpenGL(window, context);
+    ImGui_ImplOpenGL3_Init("#version 330");
 }
 
 void Render::setupWindow() {
@@ -64,5 +77,8 @@ void Render::destroyWindow() {
         SDL_GL_DeleteContext(context);
         context = nullptr;
     }
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
     SDL_Quit();
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../ControlPanel/control_panel.hpp"
 #include "../Fluid/fluid.hpp"
 #include "../Objects/objects.hpp"
 
@@ -27,6 +28,7 @@ class Render {
     SDL_GLContext context;
     std::shared_ptr<Fluid> fluid;
     std::shared_ptr<Objects> objects;
+    std::shared_ptr<ControlPanel> controlPanel;
 
     bool quit;
 
@@ -37,6 +39,7 @@ class Render {
     // Setup
     void clear();
     void initOpenGL();
+    void setupImGui();
     void setupWindow();
     void destroyWindow();
 

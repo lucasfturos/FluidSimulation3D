@@ -4,18 +4,22 @@
 #include "../GLObjects/shader.hpp"
 #include "../GLObjects/vertex_array.hpp"
 #include "../Objects/cylinder.hpp"
-#include "../Objects/plane.hpp"
 #include "../Objects/sphere.hpp"
 
 #include <memory>
 
-class Objects {
+enum class ObjectType {
+    Sphere,
+    Cylinder,
+    Plane,
+    Cube,
+};
 
+class Objects {
   private:
     std::shared_ptr<Cylinder> cylinder;
-    std::shared_ptr<Plane> plane;
     std::shared_ptr<Sphere> sphere;
-    
+
     glm::mat4 viewMat;
     glm::mat4 projMat;
     float t;
@@ -32,6 +36,6 @@ class Objects {
     Objects(glm::mat4, glm::mat4);
 
     void setTime(float);
-    void setup();
+    void setup(ObjectType);
     void run();
 };

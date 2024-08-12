@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Common/perlin.hpp"
+#include "../Common/util.hpp"
 #include "../GLObjects/index_buffer.hpp"
 #include "../GLObjects/shader.hpp"
 #include "../GLObjects/texture.hpp"
@@ -14,13 +15,6 @@
 
 class Fluid {
   protected:
-    struct SimulationParameters {
-        int iter;
-        float diffusion;
-        float viscosity;
-        float dt;
-    };
-
     const int N = 25;
     const int nSize = N * N * N;
 
@@ -75,6 +69,7 @@ class Fluid {
 
     void setFilename(const std::string &);
     void setTime(float);
+    void setSimulationParams(SimulationParameters);
     void setup();
     void run();
 };

@@ -1,12 +1,15 @@
 #include "render.hpp"
+#include "../../external/imgui/backends/imgui_impl_opengl3.h"
+#include "../../external/imgui/backends/imgui_impl_sdl2.h"
 
 Render::Render()
     : window(nullptr), context(nullptr),
       fluid(std::make_shared<Fluid>(viewDefaultMat, projDefaultMat)),
       objects(std::make_shared<Objects>(viewDefaultMat, projDefaultMat)),
-      quit(false) {
+      controlPanel(std::make_shared<ControlPanel>()), quit(false) {
     setupWindow();
     initOpenGL();
+    setupImGui();
 
     fluid->setFilename("./assets/data/simulation_params.json");
 }
@@ -14,13 +17,23 @@ Render::Render()
 Render::~Render() { destroyWindow(); }
 
 void Render::setup() {
-    // objects->setup();
+    controlPanel->setup();
+    objects->setup(ObjectType::Cylinder);
     fluid->setup();
 }
 
 void Render::draw() {
-    // objects->run();
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplSDL2_NewFrame();
+    ImGui::NewFrame();
+
+    controlPanel->run();
+
+    objects->run();
     fluid->run();
+
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 void Render::run() {
