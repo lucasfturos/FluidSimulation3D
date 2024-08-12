@@ -9,24 +9,9 @@ Fluid::Fluid(glm::mat4 view, glm::mat4 projection)
       Vy0(nSize, 0.0f), Vz0(nSize, 0.0f), colors(nSize * 3, 0.0f), t(0.0f),
       viewMat(view), projMat(projection) {}
 
-void Fluid::setFilename(const std::string &filename) { loadParams(filename); }
+void Fluid::setSimulationParams(SimulationParams p) { params = p; }
 
 void Fluid::setTime(float time) { t = time; }
-
-void Fluid::loadParams(const std::string &filename) {
-    std::ifstream file(filename, std::ifstream::binary);
-    if (!file.is_open())
-        throw std::runtime_error("Cannot open file: " + filename);
-
-    Json::Value root;
-    file >> root;
-    params = {
-        .iter = root.get("iter", 16).asInt(),
-        .diffusion = root.get("diffusion", 1.0e-5).asFloat(),
-        .viscosity = root.get("viscosity", 1.0e-6).asFloat(),
-        .dt = root.get("dt", 0.01).asFloat(),
-    };
-}
 
 void Fluid::drawDensity() {
     colors.clear();

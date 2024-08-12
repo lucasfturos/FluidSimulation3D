@@ -8,6 +8,7 @@ struct SimulationParams {
 };
 
 enum class ObjectType {
+    None,
     Sphere,
     Cylinder,
     Plane,

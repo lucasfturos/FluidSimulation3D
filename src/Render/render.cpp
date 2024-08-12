@@ -10,15 +10,13 @@ Render::Render()
     setupWindow();
     initOpenGL();
     setupImGui();
-
-    fluid->setFilename("./assets/data/simulation_params.json");
 }
 
 Render::~Render() { destroyWindow(); }
 
 void Render::setup() {
     controlPanel->setup();
-    objects->setup(ObjectType::Cylinder);
+    objects->setup();
     fluid->setup();
 }
 
@@ -28,6 +26,9 @@ void Render::draw() {
     ImGui::NewFrame();
 
     controlPanel->run();
+
+    fluid->setSimulationParams(controlPanel->getSimulationParams());
+    objects->setObjectType(controlPanel->getObjectType());
 
     objects->run();
     fluid->run();

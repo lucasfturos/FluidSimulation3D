@@ -11,7 +11,6 @@ void ControlPanel::styleWidget() {
     // Window
     style.WindowRounding = 5.3f;
     style.FrameRounding = 2.3f;
-    style.ScrollbarRounding = 0;
 
     style.Colors[ImGuiCol_Text] = ImVec4(0.9f, 0.9f, 0.9f, 0.9f);
     style.Colors[ImGuiCol_TextDisabled] = ImVec4(0.6f, 0.6f, 0.6f, 1.0f);

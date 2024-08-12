@@ -13,6 +13,7 @@ class Objects {
   private:
     std::shared_ptr<Cylinder> cylinder;
     std::shared_ptr<Sphere> sphere;
+    ObjectType objectType;
 
     glm::mat4 viewMat;
     glm::mat4 projMat;
@@ -25,11 +26,15 @@ class Objects {
     std::shared_ptr<Shader> shader;
 
     std::vector<GLuint> indices;
+    std::vector<glm::vec3> vertices;
+
+    void update();
 
   public:
     Objects(glm::mat4, glm::mat4);
 
+    void setObjectType(ObjectType);
     void setTime(float);
-    void setup(ObjectType);
+    void setup();
     void run();
 };

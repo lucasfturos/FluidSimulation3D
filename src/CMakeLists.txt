@@ -38,7 +38,6 @@ add_subdirectory(GLObjects)
 find_package(OpenGL REQUIRED)
 find_package(glm REQUIRED)
 find_package(GLEW REQUIRED)
-find_package(jsoncpp REQUIRED)
 find_package(SDL2 REQUIRED)
 
 add_executable(${PROJECT_NAME} 
@@ -47,7 +46,6 @@ add_executable(${PROJECT_NAME}
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
-    ${JSONCPP_INCLUDE_DIRS}
     ${SDL2_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIRS}
     Common
@@ -61,8 +59,6 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    # Jsoncpp
-    jsoncpp
     # SDL2
     ${SDL2_LIBRARIES}
     # OpenGL

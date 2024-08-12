@@ -10,6 +10,7 @@ class ControlPanel {
 
   private:
     SimulationParams params;
+    ObjectType objectType;
 
     // GUI
     void initFont();
@@ -18,7 +19,9 @@ class ControlPanel {
   public:
     ControlPanel();
 
+    ObjectType getObjectType();
     SimulationParams getSimulationParams();
+
     void setup();
     void run();
 };

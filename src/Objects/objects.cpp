@@ -4,14 +4,26 @@
 
 Objects::Objects(glm::mat4 view, glm::mat4 projection)
     : cylinder(std::make_shared<Cylinder>(8, 2, 2, 20)),
-      sphere(std::make_shared<Sphere>(5, 20)), viewMat(view),
-      projMat(projection), t(0.0f) {}
+      sphere(std::make_shared<Sphere>(5, 20)), objectType(ObjectType::None),
+      viewMat(view), projMat(projection), t(0.0f) {}
+
+void Objects::setObjectType(ObjectType type) {
+    if (objectType != type) {
+        objectType = type;
+        update();
+    }
+}
 
 void Objects::setTime(float time) { t = time; }
 
-void Objects::setup(ObjectType type) {
-    std::vector<glm::vec3> vertices;
-    switch (type) {
+void Objects::update() {
+    vertices.clear();
+    indices.clear();
+
+    switch (objectType) {
+    case ObjectType::None:
+        return;
+        break;
     case ObjectType::Sphere:
         vertices = sphere->genVertices();
         indices = sphere->genIndices();
@@ -42,7 +54,13 @@ void Objects::setup(ObjectType type) {
     shader = std::make_shared<Shader>("assets/shader/basic.shader");
 }
 
+void Objects::setup() { update(); }
+
 void Objects::run() {
+    if (objectType == ObjectType::None) {
+        return;
+    }
+
     shader->bind();
 
     glm::mat4 model = glm::mat4(1.0f);

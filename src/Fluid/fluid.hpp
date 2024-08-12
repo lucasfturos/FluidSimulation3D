@@ -39,7 +39,6 @@ class Fluid {
     std::shared_ptr<IndexBuffer> ib;
     std::shared_ptr<Texture> texture;
 
-    void loadParams(const std::string &);
     void drawDensity();
     void draw();
 
@@ -67,7 +66,6 @@ class Fluid {
   public:
     Fluid(glm::mat4, glm::mat4);
 
-    void setFilename(const std::string &);
     void setTime(float);
     void setSimulationParams(SimulationParams);
     void setup();
