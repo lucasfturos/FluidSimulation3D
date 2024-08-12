@@ -2,13 +2,15 @@
 #version 330 core
 
 layout(location = 0) in vec3 aPos;
+out vec3 vPos;
+out vec3 TexCoords;
 
 uniform mat4 uMVP;
-out vec3 TexCoords;
 
 void main() {
     TexCoords = (aPos + 1.0) / 2.0;
     gl_Position = uMVP * vec4(aPos, 1.0);
+    vPos = gl_Position.xyz / gl_Position.w;
 }
 
 #shader fragment
@@ -17,21 +19,42 @@ void main() {
 #define STEPS 64
 #define STEP_SIZE 1.0e-3
 #define EPS 1.0e-6
-#define MAX_DIST 100.0
+#define MAX_DIST 50.0
 
 in vec3 TexCoords;
+in vec3 vPos;
 out vec4 color;
 
 uniform sampler3D densityTex;
 
-float sdFluid(vec3 p) { return texture(densityTex, p).r - 0.5; }
+// Função de distância para um cubo
+float sdBox(vec3 p, vec3 b) {
+    vec3 q = abs(p) - b;
+    return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
+}
 
-bool rayMarchHit(vec3 pos, vec3 direction, out vec3 hitPos) {
+// Função de distância para o fluido
+float sdFluid(vec3 p) { 
+    return texture(densityTex, p).r - 0.5; 
+}
+
+// Operações booleanas suaves
+float opSmoothIntersection(float d1, float d2, float k) {
+    float h = max(k - abs(d1 - d2), 0.0);
+    return max(d1, d2) + h * h * 0.25 / k;
+}
+
+bool rayMarchHit(vec3 ro, vec3 rd, out vec3 hitPos) {
     float t = 0.0;
+    float d = 1e10;
 
     for (int i = 0; i < STEPS; ++i) {
-        vec3 p = pos + t * direction;
-        float d = sdFluid(p);
+        vec3 p = ro + t * rd;
+        float d1 = sdFluid(p);
+        float d2 = sdBox(p, vec3(1.0));
+        float dt = opSmoothIntersection(d1, d2, 0.25);
+        d = min(d, dt);
+
         if (d < EPS) {
             hitPos = p;
             return true;
@@ -46,12 +69,14 @@ bool rayMarchHit(vec3 pos, vec3 direction, out vec3 hitPos) {
 }
 
 void main() {
-    vec3 rayOrigin = TexCoords;
-    vec3 rayDirection = normalize(vec3(0.0, 0.0, -1.0));
+    vec3 ro = TexCoords;
+    vec3 rd = normalize(TexCoords - vPos);
     vec3 hitPos;
 
-    if (rayMarchHit(rayOrigin, rayDirection, hitPos)) {
+    if (rayMarchHit(ro, rd, hitPos)) {
         vec3 densityColor = texture(densityTex, hitPos).rgb;
         color = vec4(densityColor, 1.0);
+    } else {
+        discard;
     }
 }

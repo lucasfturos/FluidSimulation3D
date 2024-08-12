@@ -22,16 +22,13 @@ void ControlPanel::run() {
                                 ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::PushItemWidth(200);
         ImGui::InputInt("Iterations", &params.iter, 1, 30);
-       
-        ImGui::SameLine();
-        if (ImGui::Button("Reset")) {
-            params = {16, 1.0e-5f, 1.0e-6f, 0.1f};
-        }
-
         ImGui::InputFloat("Diffusion", &params.diffusion, 0.0f, 0.0f, "%.1e");
         ImGui::InputFloat("Viscosity", &params.viscosity, 0.0f, 0.0f, "%.1e");
         ImGui::InputFloat("dt", &params.dt, 0.0f, 0.0f, "%.1e");
         ImGui::PopItemWidth();
+        if (ImGui::Button("Reset")) {
+            params = {16, 1.0e-5f, 1.0e-6f, 0.1f};
+        }
     }
 
     if (ImGui::CollapsingHeader("Object Selection")) {
@@ -39,7 +36,7 @@ void ControlPanel::run() {
         std::vector<const char *> objectTypeNames = {
             "None", "Sphere", "Cylinder", "Plane", "Cube"};
         int currentType = static_cast<int>(objectType);
-        if (ImGui::Combo("Object", &currentType, objectTypeNames.data(),
+        if (ImGui::Combo(" ", &currentType, objectTypeNames.data(),
                          objectTypeNames.size())) {
             objectType = static_cast<ObjectType>(currentType);
         }

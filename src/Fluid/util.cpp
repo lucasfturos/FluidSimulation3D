@@ -52,13 +52,12 @@ void Fluid::setBND(int b, std::vector<float> &x) {
                  x[IX(N - 1, N - 1, N - 2)]);
 }
 
-void Fluid::project(std::vector<float> &velocX,
-                              std::vector<float> &velocY,
-                              std::vector<float> &velocZ, std::vector<float> &p,
-                              std::vector<float> &div) {
-    for (int k = 1; k < N - 1; k++) {
-        for (int j = 1; j < N - 1; j++) {
-            for (int i = 1; i < N - 1; i++) {
+void Fluid::project(std::vector<float> &velocX, std::vector<float> &velocY,
+                    std::vector<float> &velocZ, std::vector<float> &p,
+                    std::vector<float> &div) {
+    for (int k = 1; k < N - 1; ++k) {
+        for (int j = 1; j < N - 1; ++j) {
+            for (int i = 1; i < N - 1; ++i) {
                 div[IX(i, j, k)] =
                     -0.5f *
                     (velocX[IX(i + 1, j, k)] - velocX[IX(i - 1, j, k)] +
@@ -74,9 +73,9 @@ void Fluid::project(std::vector<float> &velocX,
     setBND(0, p);
     linSolve(0, p, div, 1, 6);
 
-    for (int k = 1; k < N - 1; k++) {
-        for (int j = 1; j < N - 1; j++) {
-            for (int i = 1; i < N - 1; i++) {
+    for (int k = 1; k < N - 1; ++k) {
+        for (int j = 1; j < N - 1; ++j) {
+            for (int i = 1; i < N - 1; ++i) {
                 velocX[IX(i, j, k)] -=
                     0.5f * (p[IX(i + 1, j, k)] - p[IX(i - 1, j, k)]) * N;
                 velocY[IX(i, j, k)] -=
@@ -92,11 +91,10 @@ void Fluid::project(std::vector<float> &velocX,
     setBND(3, velocZ);
 }
 
-void Fluid::advect(int b, std::vector<float> &d,
-                             const std::vector<float> &d0,
-                             const std::vector<float> &velocX,
-                             const std::vector<float> &velocY,
-                             const std::vector<float> &velocZ, float dt) {
+void Fluid::advect(int b, std::vector<float> &d, const std::vector<float> &d0,
+                   const std::vector<float> &velocX,
+                   const std::vector<float> &velocY,
+                   const std::vector<float> &velocZ, float dt) {
     float i0, i1, j0, j1, k0, k1;
 
     float dtx = dt * (N - 2);
@@ -110,9 +108,9 @@ void Fluid::advect(int b, std::vector<float> &d,
     float ifloat, jfloat, kfloat;
     int i, j, k;
 
-    for (k = 1, kfloat = 1; k < N - 1; k++, kfloat++) {
-        for (j = 1, jfloat = 1; j < N - 1; j++, jfloat++) {
-            for (i = 1, ifloat = 1; i < N - 1; i++, ifloat++) {
+    for (k = 1, kfloat = 1; k < N - 1; ++k, ++kfloat) {
+        for (j = 1, jfloat = 1; j < N - 1; ++j, ++jfloat) {
+            for (i = 1, ifloat = 1; i < N - 1; ++i, ++ifloat) {
                 tmp1 = dtx * velocX[IX(i, j, k)];
                 tmp2 = dty * velocY[IX(i, j, k)];
                 tmp3 = dtz * velocZ[IX(i, j, k)];
@@ -171,19 +169,19 @@ void Fluid::advect(int b, std::vector<float> &d,
     setBND(b, d);
 }
 
-void Fluid::linSolve(int b, std::vector<float> &x,
-                               const std::vector<float> &x0, float a, float c) {
+void Fluid::linSolve(int b, std::vector<float> &x, const std::vector<float> &x0,
+                     float a, float c) {
     int iter = params.iter;
     float cRecip = 1.0f / c;
-    for (int k = 0; k < iter; k++) {
-        for (int m = 1; m < N - 1; m++) {
-            for (int j = 1; j < N - 1; j++) {
-                for (int i = 1; i < N - 1; i++) {
-                    x[IX(i, j, m)] =
-                        (x0[IX(i, j, m)] +
-                         a * (x[IX(i + 1, j, m)] + x[IX(i - 1, j, m)] +
-                              x[IX(i, j + 1, m)] + x[IX(i, j - 1, m)] +
-                              x[IX(i, j, m + 1)] + x[IX(i, j, m - 1)])) *
+    for (int m = 0; m < iter; ++m) {
+        for (int k = 1; k < N - 1; ++k) {
+            for (int j = 1; j < N - 1; ++j) {
+                for (int i = 1; i < N - 1; ++i) {
+                    x[IX(i, j, k)] =
+                        (x0[IX(i, j, k)] +
+                         a * (x[IX(i + 1, j, k)] + x[IX(i - 1, j, k)] +
+                              x[IX(i, j + 1, k)] + x[IX(i, j - 1, k)] +
+                              x[IX(i, j, k + 1)] + x[IX(i, j, k - 1)])) *
                         cRecip;
                 }
             }
@@ -192,9 +190,8 @@ void Fluid::linSolve(int b, std::vector<float> &x,
     }
 }
 
-void Fluid::diffuse(int b, std::vector<float> &x,
-                              const std::vector<float> &x0, float diff,
-                              float dt) {
+void Fluid::diffuse(int b, std::vector<float> &x, const std::vector<float> &x0,
+                    float diff, float dt) {
     float a = dt * diff * (N - 2) * (N - 2);
     linSolve(b, x, x0, a, 1 + 6 * a);
 }

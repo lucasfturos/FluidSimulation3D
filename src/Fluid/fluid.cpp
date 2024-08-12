@@ -1,13 +1,15 @@
 #include "fluid.hpp"
 #include "../Common/color.hpp"
 #include "../Objects/cube.hpp"
-#include <jsoncpp/json/json.h>
 
-Fluid::Fluid(glm::mat4 view, glm::mat4 projection)
+Fluid::Fluid()
     : perlin(std::make_shared<Perlin>()), s(nSize, 0.0f), density(nSize, 0.0f),
       Vx(nSize, 0.0f), Vy(nSize, 0.0f), Vz(nSize, 0.0f), Vx0(nSize, 0.0f),
       Vy0(nSize, 0.0f), Vz0(nSize, 0.0f), colors(nSize * 3, 0.0f), t(0.0f),
-      viewMat(view), projMat(projection) {}
+      viewMat(glm::lookAt(glm::vec3(0.0f, 0.0f, 1.5f),
+                          glm::vec3(0.0f, 0.0f, 0.0f),
+                          glm::vec3(0.0f, 1.0f, 0.0f))),
+      projMat(glm::perspective(glm::radians(45.0f), 16 / 9.0f, 0.1f, 100.0f)) {}
 
 void Fluid::setSimulationParams(SimulationParams p) { params = p; }
 
@@ -47,7 +49,6 @@ void Fluid::setup() {
 
     texture = std::make_shared<Texture>(N, N, N, GL_RGB, GL_FLOAT);
     shader->bind();
-    shader->setUniform1i("densityTex", 0);
 }
 
 void Fluid::run() {
@@ -88,18 +89,15 @@ void Fluid::run() {
     }
 
     drawDensity();
-    fadeDensity();
 
     shader->bind();
 
     glm::mat4 model = glm::mat4(1.0f);
-    glm::vec3 translation(0.0f, 0.0f, 0.0f);
-    model = glm::translate(model, translation);
 
-    glm::vec3 scale(5.0f);
+    glm::vec3 scale(0.2f);
     model = glm::scale(model, scale);
 
-    float angle = t * glm::radians(45.0f);
+    float angle = t * glm::radians(90.0f);
     glm::mat4 rotationMatrix =
         glm::rotate(glm::mat4(1.0f), angle, {1.0f, 1.0f, 0.0f});
 

@@ -19,6 +19,8 @@ void Fluid::step() {
 
     diffuse(0, s, density, diffusion, dt);
     advect(0, density, s, Vx, Vy, Vz, dt);
+
+    fadeDensity();
 }
 
 void Fluid::addDensity(glm::ivec3 pos, float amount) {

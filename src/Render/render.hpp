@@ -11,7 +11,7 @@
 
 class Render {
   protected:
-    const int screenWidth = 1080;
+    const int screenWidth = 1280;
     const int screenHeight = 720;
     const int fps = 60;
     const Uint32 frameDelay = 1000.0 / fps;

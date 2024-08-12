@@ -64,7 +64,7 @@ class Fluid {
                  float);
 
   public:
-    Fluid(glm::mat4, glm::mat4);
+    Fluid();
 
     void setTime(float);
     void setSimulationParams(SimulationParams);
