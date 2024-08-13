@@ -40,6 +40,11 @@ class Shader {
         glUniform1i(location, value);
     }
 
+    void setUniform2f(const std::string &name, glm::vec2 value) {
+        GLint location = getUniformLocation(name);
+        glUniform2f(location, value.x, value.y);
+    }
+
     void setUniform3f(const std::string &name, glm::vec3 value) {
         GLint location = getUniformLocation(name);
         glUniform3f(location, value.x, value.y, value.z);

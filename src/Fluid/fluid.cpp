@@ -2,14 +2,14 @@
 #include "../Common/color.hpp"
 #include "../Objects/cube.hpp"
 
-Fluid::Fluid()
+Fluid::Fluid(glm::mat4 projection)
     : perlin(std::make_shared<Perlin>()), s(nSize, 0.0f), density(nSize, 0.0f),
       Vx(nSize, 0.0f), Vy(nSize, 0.0f), Vz(nSize, 0.0f), Vx0(nSize, 0.0f),
       Vy0(nSize, 0.0f), Vz0(nSize, 0.0f), colors(nSize * 3, 0.0f), t(0.0f),
       viewMat(glm::lookAt(glm::vec3(0.0f, 0.0f, 1.5f),
                           glm::vec3(0.0f, 0.0f, 0.0f),
                           glm::vec3(0.0f, 1.0f, 0.0f))),
-      projMat(glm::perspective(glm::radians(45.0f), 16 / 9.0f, 0.1f, 100.0f)) {}
+      projMat(projection) {}
 
 void Fluid::setSimulationParams(SimulationParams p) { params = p; }
 
@@ -49,6 +49,7 @@ void Fluid::setup() {
 
     texture = std::make_shared<Texture>(N, N, N, GL_RGB, GL_FLOAT);
     shader->bind();
+    shader->setUniform1i("uDensity", 0);
 }
 
 void Fluid::run() {
