@@ -1,4 +1,3 @@
-#include "../../external/imgui/backends/imgui_impl_sdl2.h"
 #include "render.hpp"
 
 void Render::handleEvents() {

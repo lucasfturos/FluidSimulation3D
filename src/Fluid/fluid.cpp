@@ -1,6 +1,6 @@
 #include "fluid.hpp"
-#include "../Common/color.hpp"
-#include "../Objects/cube.hpp"
+#include "Common/color.hpp"
+#include "Objects/cube.hpp"
 
 Fluid::Fluid(glm::mat4 projection)
     : perlin(std::make_shared<Perlin>()), s(nSize, 0.0f), density(nSize, 0.0f),

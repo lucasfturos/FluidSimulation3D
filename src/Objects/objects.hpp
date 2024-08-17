@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../Common/util.hpp"
-#include "../GLObjects/index_buffer.hpp"
-#include "../GLObjects/shader.hpp"
-#include "../GLObjects/vertex_array.hpp"
-#include "../Objects/cylinder.hpp"
-#include "../Objects/sphere.hpp"
+#include "Common/util.hpp"
+#include "GLObjects/index_buffer.hpp"
+#include "GLObjects/shader.hpp"
+#include "GLObjects/vertex_array.hpp"
+#include "Objects/cylinder.hpp"
+#include "Objects/sphere.hpp"
 
 #include <memory>
 

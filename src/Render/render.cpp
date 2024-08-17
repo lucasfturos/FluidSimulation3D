@@ -1,6 +1,4 @@
 #include "render.hpp"
-#include "../../external/imgui/backends/imgui_impl_opengl3.h"
-#include "../../external/imgui/backends/imgui_impl_sdl2.h"
 
 Render::Render()
     : window(nullptr), context(nullptr),

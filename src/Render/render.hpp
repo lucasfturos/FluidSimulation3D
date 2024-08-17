@@ -1,8 +1,11 @@
 #pragma once
 
-#include "../ControlPanel/control_panel.hpp"
-#include "../Fluid/fluid.hpp"
-#include "../Objects/objects.hpp"
+#include "ControlPanel/control_panel.hpp"
+#include "Fluid/fluid.hpp"
+#include "Objects/objects.hpp"
+
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_sdl2.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>

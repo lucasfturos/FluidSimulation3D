@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../Common/perlin.hpp"
-#include "../Common/util.hpp"
-#include "../GLObjects/index_buffer.hpp"
-#include "../GLObjects/shader.hpp"
-#include "../GLObjects/texture.hpp"
-#include "../GLObjects/vertex_array.hpp"
+#include "Common/perlin.hpp"
+#include "Common/util.hpp"
+#include "GLObjects/index_buffer.hpp"
+#include "GLObjects/shader.hpp"
+#include "GLObjects/texture.hpp"
+#include "GLObjects/vertex_array.hpp"
 
 #include <algorithm>
 #include <fstream>

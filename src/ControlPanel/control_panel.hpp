@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../external/imgui/imgui.h"
-#include "../Common/util.hpp"
+#include "imgui.h"
+#include "Common/util.hpp"
 
 class ControlPanel {
   protected:
