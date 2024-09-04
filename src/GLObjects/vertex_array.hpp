@@ -1,7 +1,7 @@
 #pragma once
 
-#include "VertexBufferLayout/vertex_buffer_layout.hpp"
 #include "vertex_buffer.hpp"
+#include "vertex_buffer_layout.hpp"
 
 class VertexArray {
   private:
@@ -29,20 +29,25 @@ class VertexArray {
         return *this;
     }
 
-    void addBuffer(const VertexBuffer &vb, const VertexBufferLayout &layout) {
+    template <typename T>
+    void addBuffer(const VertexBuffer<T> &vb,
+                   const VertexBufferLayout &layout) const {
         bind();
         vb.bind();
         const auto &elements = layout.getElements();
         GLuint offset = 0;
-        for (GLuint i = 0; i < elements.size(); ++i) {
-            const auto &element = elements[i];
-            glEnableVertexAttribArray(i);
-            glVertexAttribPointer(i, element.count, element.type,
+        GLuint index = 0;
+        for (const auto &element : elements) {
+            glEnableVertexAttribArray(index);
+            glVertexAttribPointer(index, element.count, element.type,
                                   element.normalized, layout.getStride(),
                                   reinterpret_cast<const void *>(offset));
             offset += element.count *
                       VertexBufferElement::getSizeOfType(element.type);
+            ++index;
         }
+        vb.unbind();
+        unbind();
     }
 
     void bind() const { glBindVertexArray(m_RendererID); }

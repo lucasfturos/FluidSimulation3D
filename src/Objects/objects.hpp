@@ -21,7 +21,7 @@ class Objects {
 
   private:
     std::shared_ptr<VertexArray> va;
-    std::shared_ptr<VertexBuffer> vb;
+    std::shared_ptr<VertexBuffer<glm::vec3>> vb;
     std::shared_ptr<IndexBuffer> ib;
     std::shared_ptr<Shader> shader;
 

@@ -43,7 +43,7 @@ void Objects::update() {
     }
 
     va = std::make_shared<VertexArray>();
-    vb = std::make_shared<VertexBuffer>(vertices);
+    vb = std::make_shared<VertexBuffer<glm::vec3>>(vertices);
     ib = std::make_shared<IndexBuffer>(indices);
 
     VertexBufferLayout layout;

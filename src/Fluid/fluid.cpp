@@ -9,7 +9,7 @@ Fluid::Fluid(glm::mat4 projection)
       viewMat(glm::lookAt(glm::vec3(0.0f, 0.0f, 1.5f),
                           glm::vec3(0.0f, 0.0f, 0.0f),
                           glm::vec3(0.0f, 1.0f, 0.0f))),
-      projMat(projection) {}
+      projMat(projection), gravity(glm::vec3(0, 9.81f, 0)) {}
 
 void Fluid::setSimulationParams(SimulationParams p) { params = p; }
 
@@ -17,13 +17,14 @@ void Fluid::setTime(float time) { t = time; }
 
 void Fluid::drawDensity() {
     colors.clear();
+
     for (int z = 0; z < N; ++z) {
         for (int y = 0; y < N; ++y) {
             for (int x = 0; x < N; ++x) {
                 int index = IX(x, y, z);
                 float d = density[index];
                 auto color = getColorByValue(std::fmod((d + 50), 255.0f),
-                                             200 / 255.0f, d / 255.0f);
+                                             100 / 255.0f, d / 255.0f);
                 int colorIndex = index * 3;
                 colors[colorIndex + 0] = color.r;
                 colors[colorIndex + 1] = color.g;
@@ -37,7 +38,7 @@ void Fluid::drawDensity() {
 
 void Fluid::setup() {
     va = std::make_shared<VertexArray>();
-    vb = std::make_shared<VertexBuffer>(cubeVertices);
+    vb = std::make_shared<VertexBuffer<glm::vec3>>(cubeVertices);
     ib = std::make_shared<IndexBuffer>(cubeIndices);
 
     VertexBufferLayout layout;
@@ -63,18 +64,12 @@ void Fluid::run() {
         for (int i = -1; i <= 1; ++i) {
             for (int j = -1; j <= 1; ++j) {
                 for (int k = -1; k <= 1; ++k) {
-                    addDensity(
-                        {
-                            vertex.x + i,
-                            vertex.y + j,
-                            vertex.z + k,
-                        },
-                        dis(gen));
+                    addDensity(vertex + glm::vec3(i, j, k), dis(gen));
                 }
             }
         }
 
-        float noiseScale = 0.2f;
+        float noiseScale = 0.5f;
         for (auto i = 0; i < 8; ++i) {
             float noiseValue = perlin->noise({
                 vertex.x * noiseScale,
@@ -95,7 +90,7 @@ void Fluid::run() {
 
     glm::mat4 model = glm::mat4(1.0f);
 
-    glm::vec3 scale(0.2f);
+    glm::vec3 scale(0.3f);
     model = glm::scale(model, scale);
 
     float angle = t * glm::radians(90.0f);

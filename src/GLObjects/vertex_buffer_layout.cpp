@@ -1,6 +1,6 @@
 #include "vertex_buffer_layout.hpp"
 
-template <typename T> void VertexBufferLayout::push(GLuint count) {
+template <typename T> void VertexBufferLayout::push(GLuint /* count */) {
     static_assert(t_always_false<T>(), "Type error");
 }
 

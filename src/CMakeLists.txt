@@ -9,6 +9,8 @@ set(SRC_HEADER
     ControlPanel/control_panel.hpp
     # Fluid
     Fluid/fluid.hpp
+    # GLObjects
+    GLObjects/vertex_buffer_layout.hpp
     # Objects
     Objects/objects.hpp
     # Render
@@ -23,6 +25,8 @@ set(SRC_SOURCE
     Fluid/fluid.cpp
     Fluid/logic.cpp
     Fluid/util.cpp
+    # GLObjects
+    GLObjects/vertex_buffer_layout.cpp
     # Objects
     Objects/objects.cpp
     # Render
@@ -32,8 +36,6 @@ set(SRC_SOURCE
     # Main
     main.cpp
 )
-
-add_subdirectory(GLObjects)
 
 find_package(OpenGL REQUIRED)
 find_package(glm REQUIRED)
@@ -53,7 +55,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
     External_lib
-    GLObjects_lib
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE

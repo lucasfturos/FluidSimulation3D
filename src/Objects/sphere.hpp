@@ -41,8 +41,7 @@ class Sphere {
                 GLfloat y = cosTheta;
                 GLfloat z = sinPhi * sinTheta;
 
-                vertices.push_back(
-                    glm::vec3(x * radius, y * radius, z * radius));
+                vertices.push_back(glm::vec3(x, y, z) * radius);
             }
         }
         return vertices;
