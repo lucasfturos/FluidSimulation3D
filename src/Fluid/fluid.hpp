@@ -6,6 +6,7 @@
 #include "GLObjects/shader.hpp"
 #include "GLObjects/texture.hpp"
 #include "GLObjects/vertex_array.hpp"
+#include "Objects/cube.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -17,6 +18,7 @@ class Fluid {
   protected:
     const int N = 25;
     const int nSize = N * N * N;
+    const float FADE_RATE = 0.9f;
 
   private:
     std::shared_ptr<Perlin> perlin;
@@ -47,6 +49,7 @@ class Fluid {
     // Logic
     void step();
     void fadeDensity();
+    void setupFluidDynamics();
     void addDensity(glm::ivec3, float);
     void addVelocity(glm::ivec3, glm::vec3);
     void addTurbulence(glm::ivec3, float, glm::vec3);

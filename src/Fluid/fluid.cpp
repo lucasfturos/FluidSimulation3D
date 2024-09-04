@@ -1,6 +1,5 @@
 #include "fluid.hpp"
 #include "Common/color.hpp"
-#include "Objects/cube.hpp"
 
 Fluid::Fluid(glm::mat4 projection)
     : perlin(std::make_shared<Perlin>()), s(nSize, 0.0f), density(nSize, 0.0f),
@@ -11,9 +10,9 @@ Fluid::Fluid(glm::mat4 projection)
                           glm::vec3(0.0f, 1.0f, 0.0f))),
       projMat(projection), gravity(glm::vec3(0, 9.81f, 0)) {}
 
-void Fluid::setSimulationParams(SimulationParams p) { params = p; }
-
 void Fluid::setTime(float time) { t = time; }
+
+void Fluid::setSimulationParams(SimulationParams p) { params = p; }
 
 void Fluid::drawDensity() {
     colors.clear();
@@ -56,47 +55,18 @@ void Fluid::setup() {
 void Fluid::run() {
     step();
 
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(50, 350);
-
-    for (const auto &vertex : cubeVertices) {
-        for (int i = -1; i <= 1; ++i) {
-            for (int j = -1; j <= 1; ++j) {
-                for (int k = -1; k <= 1; ++k) {
-                    addDensity(vertex + glm::vec3(i, j, k), dis(gen));
-                }
-            }
-        }
-
-        float noiseScale = 0.5f;
-        for (auto i = 0; i < 8; ++i) {
-            float noiseValue = perlin->noise({
-                vertex.x * noiseScale,
-                vertex.y * noiseScale,
-                vertex.z * noiseScale,
-            });
-            float angle = noiseValue * 2.0f * M_PI;
-            float vX = std::cos(angle) * 0.1f;
-            float vY = std::sin(angle) * 0.1f;
-            addVelocity(vertex, {vX, vY, 1.0f});
-            addTurbulence(vertex, t, {vX, vY, 1.0f});
-        }
-    }
+    setupFluidDynamics();
 
     drawDensity();
 
     shader->bind();
 
     glm::mat4 model = glm::mat4(1.0f);
-
     glm::vec3 scale(0.3f);
     model = glm::scale(model, scale);
-
     float angle = t * glm::radians(90.0f);
     glm::mat4 rotationMatrix =
         glm::rotate(glm::mat4(1.0f), angle, {1.0f, 1.0f, 0.0f});
-
     glm::mat4 mvp = projMat * viewMat * model * rotationMatrix;
     shader->setUniformMat4f("uMVP", mvp);
 
