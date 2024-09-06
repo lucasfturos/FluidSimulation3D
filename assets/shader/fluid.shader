@@ -7,7 +7,7 @@ out vec3 TexCoords;
 uniform mat4 uMVP;
 
 void main() {
-    TexCoords = (aPos + vec3(1.0)) / vec3(2.0);;
+    TexCoords = (aPos + 1.0) * 0.5;
     gl_Position = uMVP * vec4(aPos, 1.0);
 }
 

@@ -2,7 +2,8 @@
 #include <vector>
 
 ControlPanel::ControlPanel()
-    : params({16, 1.0e-5f, 1.0e-6f, 0.1f}), objectType(ObjectType::None) {}
+    : params({16, 1.0e-5f, 1.0e-6f, 0.1f, 1.0f}), objectType(ObjectType::None) {
+}
 
 ObjectType ControlPanel::getObjectType() { return objectType; }
 
@@ -25,9 +26,10 @@ void ControlPanel::run() {
         ImGui::InputFloat("Diffusion", &params.diffusion, 0.0f, 0.0f, "%.1e");
         ImGui::InputFloat("Viscosity", &params.viscosity, 0.0f, 0.0f, "%.1e");
         ImGui::InputFloat("dt", &params.dt, 0.0f, 0.0f, "%.1e");
+        ImGui::InputFloat("Fade Rate", &params.fadeRate, 0.0f, 0.0f, "%.1f");
         ImGui::PopItemWidth();
         if (ImGui::Button("Reset")) {
-            params = {16, 1.0e-5f, 1.0e-6f, 0.1f};
+            params = {16, 1.0e-5f, 1.0e-6f, 0.1f, 1.0f};
         }
     }
 

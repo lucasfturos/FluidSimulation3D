@@ -64,10 +64,10 @@ void Fluid::run() {
     glm::mat4 model = glm::mat4(1.0f);
     glm::vec3 scale(0.3f);
     model = glm::scale(model, scale);
-    float angle = t * glm::radians(90.0f);
-    glm::mat4 rotationMatrix =
-        glm::rotate(glm::mat4(1.0f), angle, {1.0f, 1.0f, 0.0f});
-    glm::mat4 mvp = projMat * viewMat * model * rotationMatrix;
+    float angle = /* t * */ glm::radians(90.0f);
+    model *= glm::rotate(glm::mat4(1.0f), angle, {1.0f, 1.0f, 0.0f});
+    glm::mat4 mvp = projMat * viewMat * model;
+
     shader->setUniformMat4f("uMVP", mvp);
 
     va->bind();

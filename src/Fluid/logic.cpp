@@ -94,7 +94,8 @@ void Fluid::addTurbulence(glm::ivec3 pos, float t, glm::vec3 amount) {
 }
 
 void Fluid::fadeDensity() {
+    float fadeRate = params.fadeRate;
     for (std::size_t i = 0; i < density.size(); ++i) {
-        density[i] = std::max(density[i] - FADE_RATE, 0.0f);
+        density[i] = std::max(density[i] - fadeRate, 0.0f);
     }
 }

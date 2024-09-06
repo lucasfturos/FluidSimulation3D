@@ -5,6 +5,7 @@ struct SimulationParams {
     float diffusion;
     float viscosity;
     float dt;
+    float fadeRate;
 };
 
 enum class ObjectType {

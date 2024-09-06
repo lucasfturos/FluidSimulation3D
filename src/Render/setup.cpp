@@ -1,8 +1,16 @@
 #include "render.hpp"
 
+void checkOpenGLErrors() {
+    GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        std::cerr << "OpenGL Error: " << std::hex << err << '\n';
+    }
+}
+
 void Render::clear() {
     glViewport(0, 0, screenWidth, screenHeight);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    checkOpenGLErrors();
 }
 
 void Render::initOpenGL() {
@@ -11,7 +19,6 @@ void Render::initOpenGL() {
     glCullFace(GL_BACK);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glMatrixMode(GL_PROJECTION);
 }
 
 void Render::setupImGui() {
@@ -23,6 +30,7 @@ void Render::setupImGui() {
 
     ImGui_ImplSDL2_InitForOpenGL(window, context);
     ImGui_ImplOpenGL3_Init("#version 330");
+    checkOpenGLErrors();
 }
 
 void Render::setupWindow() {

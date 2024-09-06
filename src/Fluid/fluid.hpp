@@ -18,7 +18,6 @@ class Fluid {
   protected:
     const int N = 25;
     const int nSize = N * N * N;
-    const float FADE_RATE = 0.9f;
 
   private:
     std::shared_ptr<Perlin> perlin;
