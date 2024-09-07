@@ -21,18 +21,18 @@ class Fluid {
 
   private:
     std::shared_ptr<Perlin> perlin;
+
     std::vector<float> s;
     std::vector<float> density;
     std::vector<float> Vx, Vy, Vz;
     std::vector<float> Vx0, Vy0, Vz0;
     std::vector<float> colors;
-    float t;
 
-    std::shared_ptr<Shader> shader;
     glm::mat4 viewMat;
     glm::mat4 projMat;
-
     glm::vec3 gravity;
+
+    float t;
 
   private:
     SimulationParams params;
@@ -40,6 +40,7 @@ class Fluid {
     std::shared_ptr<VertexArray> va;
     std::shared_ptr<VertexBuffer<glm::vec3>> vb;
     std::shared_ptr<IndexBuffer> ib;
+    std::shared_ptr<Shader> shader;
     std::shared_ptr<Texture> texture;
 
     void drawDensity();

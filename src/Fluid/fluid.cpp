@@ -4,11 +4,11 @@
 Fluid::Fluid(glm::mat4 projection)
     : perlin(std::make_shared<Perlin>()), s(nSize, 0.0f), density(nSize, 0.0f),
       Vx(nSize, 0.0f), Vy(nSize, 0.0f), Vz(nSize, 0.0f), Vx0(nSize, 0.0f),
-      Vy0(nSize, 0.0f), Vz0(nSize, 0.0f), colors(nSize * 3, 0.0f), t(0.0f),
+      Vy0(nSize, 0.0f), Vz0(nSize, 0.0f), colors(nSize * 3, 0.0f),
       viewMat(glm::lookAt(glm::vec3(0.0f, 0.0f, 1.5f),
                           glm::vec3(0.0f, 0.0f, 0.0f),
                           glm::vec3(0.0f, 1.0f, 0.0f))),
-      projMat(projection), gravity(glm::vec3(0, 9.81f, 0)) {}
+      projMat(projection), gravity(glm::vec3(0, 9.81f, 0)), t(0.0f) {}
 
 void Fluid::setTime(float time) { t = time; }
 
@@ -42,12 +42,12 @@ void Fluid::setup() {
 
     VertexBufferLayout layout;
     layout.push<GLfloat>(3);
-
     va->addBuffer(*vb, layout);
 
-    shader = std::make_shared<Shader>("assets/shader/fluid.shader");
-
+    shader = std::make_shared<Shader>("assets/shader/Fluid/fluid.vert",
+                                      "assets/shader/Fluid/fluid.frag");
     texture = std::make_shared<Texture>(N, N, N, GL_RGB, GL_FLOAT);
+
     shader->bind();
     shader->setUniform1i("uDensity", 0);
 }
@@ -69,6 +69,8 @@ void Fluid::run() {
     glm::mat4 mvp = projMat * viewMat * model;
 
     shader->setUniformMat4f("uMVP", mvp);
+    shader->setUniformMat4f("uViewMatrix", viewMat);
+    shader->setUniformMat4f("uModelMatrix", model);
 
     va->bind();
     vb->bind();

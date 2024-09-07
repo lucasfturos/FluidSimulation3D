@@ -20,9 +20,11 @@ class Shader {
     std::unordered_map<std::string, GLint> m_uniformLocationCache;
 
   public:
-    Shader(const std::string &filepath) : m_bufferID(0) {
-        ShaderProgramSource source = parseShader(filepath);
-        m_bufferID = createShader(source.vertexSource, source.fragmentSource);
+    Shader(const std::string &vertexPath, const std::string &fragmentPath)
+        : m_bufferID(0) {
+        std::string vertexSource = loadShader(vertexPath);
+        std::string fragmentSource = loadShader(fragmentPath);
+        m_bufferID = createShader(vertexSource, fragmentSource);
     }
 
     ~Shader() { glDeleteProgram(m_bufferID); }
@@ -37,7 +39,7 @@ class Shader {
 
     void setUniform1f(const std::string &name, GLfloat value) {
         GLint location = getUniformLocation(name);
-        glUniform1i(location, value);
+        glUniform1f(location, value);
     }
 
     void setUniform2f(const std::string &name, glm::vec2 value) {
@@ -68,11 +70,18 @@ class Shader {
     }
 
   private:
-    GLuint createShader(const std::string &vertex_shader,
-                        const std::string &fragment_shader) {
+    std::string loadShader(const std::string &filepath) {
+        std::ifstream file(filepath);
+        std::stringstream stream;
+        stream << file.rdbuf();
+        return stream.str();
+    }
+
+    GLuint createShader(const std::string &vertexSource,
+                        const std::string &fragmentSource) {
         GLuint program = glCreateProgram();
-        GLuint vs = compileShader(GL_VERTEX_SHADER, vertex_shader);
-        GLuint fs = compileShader(GL_FRAGMENT_SHADER, fragment_shader);
+        GLuint vs = compileShader(GL_VERTEX_SHADER, vertexSource);
+        GLuint fs = compileShader(GL_FRAGMENT_SHADER, fragmentSource);
 
         glAttachShader(program, vs);
         glAttachShader(program, fs);
@@ -85,50 +94,21 @@ class Shader {
         return program;
     }
 
-    ShaderProgramSource parseShader(const std::string &filepath) {
-        enum class ShaderType {
-            NONE = -1,
-            VERTEX = 0,
-            FRAGMENT = 1,
-        };
-
-        std::string line;
-        std::ifstream stream(filepath);
-        std::vector<std::stringstream> ss(2);
-        auto type = ShaderType::NONE;
-        while (std::getline(stream, line)) {
-            if (line.find("#shader") != std::string::npos) {
-                if (line.find("vertex") != std::string::npos) {
-                    type = ShaderType::VERTEX;
-                } else if (line.find("fragment") != std::string::npos) {
-                    type = ShaderType::FRAGMENT;
-                }
-            } else {
-                ss[static_cast<int>(type)] << line << '\n';
-            }
-        }
-
-        return {.vertexSource = ss[0].str(), .fragmentSource = ss[1].str()};
-    }
-
     GLuint compileShader(GLuint type, const std::string &source) {
         GLuint id = glCreateShader(type);
         const char *src = source.c_str();
         glShaderSource(id, 1, &src, nullptr);
         glCompileShader(id);
 
-        int sucess;
-        glGetShaderiv(id, GL_COMPILE_STATUS, &sucess);
-        if (!sucess) {
-            int len;
-            glGetShaderiv(id, GL_INFO_LOG_LENGTH, &len);
-            char *message = (char *)alloca(len * sizeof(char));
-            glGetShaderInfoLog(id, len, &len, message);
-            throw std::runtime_error(
-                "Failed compile " +
-                std::string(
-                    (type == GL_VERTEX_SHADER ? "vertex" : "fragment")) +
-                " shader!\n" + message + '\n');
+        int success;
+        glGetShaderiv(id, GL_COMPILE_STATUS, &success);
+        if (!success) {
+            int length;
+            glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+            char *message = (char *)alloca(length * sizeof(char));
+            glGetShaderInfoLog(id, length, &length, message);
+            throw std::runtime_error("Failed compile shader!\n" +
+                                     std::string(message) + '\n');
             glDeleteShader(id);
             return 0;
         }
@@ -144,7 +124,7 @@ class Shader {
         GLint location = glGetUniformLocation(m_bufferID, name.c_str());
         if (location == -1) {
             throw std::runtime_error("Warning: Uniform '" + name +
-                                     "' doesn't exit!\n");
+                                     "' doesn't exist!\n");
         }
 
         m_uniformLocationCache[name] = location;

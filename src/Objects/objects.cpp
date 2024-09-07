@@ -51,7 +51,8 @@ void Objects::update() {
 
     va->addBuffer(*vb, layout);
 
-    shader = std::make_shared<Shader>("assets/shader/basic.shader");
+    shader = std::make_shared<Shader>("assets/shader/Basic/basic.vert",
+                                      "assets/shader/Basic/basic.frag");
 }
 
 void Objects::setup() { update(); }

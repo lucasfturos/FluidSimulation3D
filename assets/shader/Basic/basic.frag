@@ -1,22 +1,6 @@
-#shader vertex
-#version 330 core
-
-layout(location = 0) in vec3 aPos;
-
-uniform mat4 uMVP;
-
-out vec3 FragPos;
-
-void main() {
-    gl_Position = uMVP * vec4(aPos, 1.0);
-    FragPos = aPos;
-};
-
-#shader fragment
 #version 330 core
 
 in vec3 FragPos;
-
 out vec4 color;
 
 const vec3 cameraPos = vec3(0.0, 2.0, 20.0);
