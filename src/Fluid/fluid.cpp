@@ -16,7 +16,6 @@ void Fluid::setSimulationParams(SimulationParams p) { params = p; }
 
 void Fluid::drawDensity() {
     colors.clear();
-
     for (int z = 0; z < N; ++z) {
         for (int y = 0; y < N; ++y) {
             for (int x = 0; x < N; ++x) {
@@ -50,15 +49,14 @@ void Fluid::setup() {
 
     shader->bind();
     shader->setUniform1i("uDensity", 0);
+    shader->unbind();
 }
 
 void Fluid::run() {
     step();
-
     setupFluidDynamics();
-
     drawDensity();
-
+  
     shader->bind();
 
     glm::mat4 model = glm::mat4(1.0f);
@@ -67,10 +65,12 @@ void Fluid::run() {
     float angle = /* t * */ glm::radians(90.0f);
     model *= glm::rotate(glm::mat4(1.0f), angle, {1.0f, 1.0f, 0.0f});
     glm::mat4 mvp = projMat * viewMat * model;
-
     shader->setUniformMat4f("uMVP", mvp);
-    shader->setUniformMat4f("uViewMatrix", viewMat);
-    shader->setUniformMat4f("uModelMatrix", model);
+   
+    glm::mat3 modelMat3 = glm::mat3(model);
+    glm::mat3 viewMat3 = glm::mat3(viewMat);
+    glm::mat3 normalMatrix = glm::transpose(glm::inverse(modelMat3)) * viewMat3;
+    shader->setUniformMat3f("uNormalMatrix", normalMatrix);
 
     va->bind();
     vb->bind();

@@ -4,8 +4,8 @@
 #include <fstream>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 #include <sstream>
-#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -64,9 +64,14 @@ class Shader {
         glUniform4f(location, value.x, value.y, value.z, value.w);
     }
 
+    void setUniformMat3f(const std::string &name, const glm::mat3 &matrix) {
+        GLint location = getUniformLocation(name);
+        glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
+    }
+
     void setUniformMat4f(const std::string &name, const glm::mat4 &matrix) {
         GLint location = getUniformLocation(name);
-        glUniformMatrix4fv(location, 1, GL_FALSE, &matrix[0][0]);
+        glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(matrix));
     }
 
   private:
@@ -123,8 +128,7 @@ class Shader {
 
         GLint location = glGetUniformLocation(m_bufferID, name.c_str());
         if (location == -1) {
-            throw std::runtime_error("Warning: Uniform '" + name +
-                                     "' doesn't exist!\n");
+            std::cerr << "Warning: Uniform '" << name << "' doesn't exist!\n";
         }
 
         m_uniformLocationCache[name] = location;
