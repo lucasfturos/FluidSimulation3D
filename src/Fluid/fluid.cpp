@@ -43,8 +43,8 @@ void Fluid::setup() {
     layout.push<GLfloat>(3);
     va->addBuffer(*vb, layout);
 
-    shader = std::make_shared<Shader>("assets/shader/Fluid/fluid.vert",
-                                      "assets/shader/Fluid/fluid.frag");
+    shader = std::make_shared<Shader>("assets/shader/Fluid/vertex.shader",
+                                      "assets/shader/Fluid/fragment.shader");
     texture = std::make_shared<Texture>(N, N, N, GL_RGB, GL_FLOAT);
 
     shader->bind();
