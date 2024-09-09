@@ -56,17 +56,17 @@ void Fluid::run() {
     step();
     setupFluidDynamics();
     drawDensity();
-  
+
     shader->bind();
 
     glm::mat4 model = glm::mat4(1.0f);
     glm::vec3 scale(0.3f);
     model = glm::scale(model, scale);
-    float angle = /* t * */ glm::radians(90.0f);
+    float angle = t * glm::radians(90.0f);
     model *= glm::rotate(glm::mat4(1.0f), angle, {1.0f, 1.0f, 0.0f});
     glm::mat4 mvp = projMat * viewMat * model;
     shader->setUniformMat4f("uMVP", mvp);
-   
+
     glm::mat3 modelMat3 = glm::mat3(model);
     glm::mat3 viewMat3 = glm::mat3(viewMat);
     glm::mat3 normalMatrix = glm::transpose(glm::inverse(modelMat3)) * viewMat3;
