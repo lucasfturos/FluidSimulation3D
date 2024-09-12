@@ -53,8 +53,7 @@ void Objects::run() {
              glm::vec3 translation(8.0f, 0.0f, 0.0f);
              model = glm::translate(model, translation);
 
-             float scaleFactor = 1.0f;
-             glm::vec3 scale(scaleFactor);
+             glm::vec3 scale(1.0f);
              model = glm::scale(model, scale);
 
              float angle = t * glm::radians(90.0f);
