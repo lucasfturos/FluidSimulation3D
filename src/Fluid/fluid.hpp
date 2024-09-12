@@ -32,7 +32,7 @@ class Fluid {
     float t;
 
   private:
-    std::shared_ptr<Mesh> mesh;
+    std::shared_ptr<Mesh<glm::vec3>> mesh;
     SimulationParams params;
 
     void drawDensity();

@@ -11,18 +11,19 @@ Fluid::Fluid(glm::mat4 projection)
       projMat(projection), gravity(glm::vec3(0, 9.81f, 0)), t(0.0f) {}
 
 void Fluid::setup() {
-    mesh = std::make_shared<Mesh>(cubeVertices, cubeIndices,
-                                  "assets/shader/Fluid/vertex.shader",
-                                  "assets/shader/Fluid/fragment.shader");
+    mesh = std::make_shared<Mesh<glm::vec3>>(
+        cubeVertices, cubeIndices, "assets/shader/Fluid/vertex.shader",
+        "assets/shader/Fluid/fragment.shader");
     mesh->setup<GLfloat>({3});
 
-    Mesh::UniformsMap uniforms = {
+    Mesh<glm::vec3>::UniformsMap uniforms = {
         {"uDensity", [](std::shared_ptr<Shader> shader) {
              shader->setUniform1i("uDensity", 0);
          }}};
     mesh->setUniforms(uniforms);
 
-    auto texture = std::make_shared<Texture>(N, N, N, GL_RGB, GL_FLOAT);
+    auto texture =
+        std::make_shared<Texture>(N, N, N, GL_RGB, GL_FLOAT, GL_TEXTURE_3D);
     mesh->setTexture(texture);
 }
 
@@ -51,7 +52,7 @@ void Fluid::run() {
     setupFluidDynamics();
     drawDensity();
 
-    Mesh::UniformsMap uniforms = {
+    Mesh<glm::vec3>::UniformsMap uniforms = {
         {"uMVP",
          [this](std::shared_ptr<Shader> shader) {
              glm::mat4 model = glm::mat4(1.0f);

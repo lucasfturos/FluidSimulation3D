@@ -8,14 +8,20 @@
 #include <functional>
 #include <memory>
 
-class Mesh {
+struct CustomVertex {
+    glm::vec3 position;
+    glm::vec3 normal;
+    glm::vec2 uv;
+};
+
+template <typename VertexType> class Mesh {
   public:
-    Mesh(const std::vector<glm::vec3> &vertices,
+    Mesh(const std::vector<VertexType> &vertices,
          const std::vector<GLuint> &indices,
          const std::string &vertexShaderPath,
          const std::string &fragmentShaderPath)
         : va(std::make_shared<VertexArray>()),
-          vb(std::make_shared<VertexBuffer<glm::vec3>>(vertices)),
+          vb(std::make_shared<VertexBuffer<VertexType>>(vertices)),
           ib(std::make_shared<IndexBuffer>(indices)),
           shader(
               std::make_shared<Shader>(vertexShaderPath, fragmentShaderPath)),
@@ -77,7 +83,7 @@ class Mesh {
 
   private:
     std::shared_ptr<VertexArray> va;
-    std::shared_ptr<VertexBuffer<glm::vec3>> vb;
+    std::shared_ptr<VertexBuffer<VertexType>> vb;
     std::shared_ptr<IndexBuffer> ib;
     std::shared_ptr<Shader> shader;
     std::shared_ptr<Texture> texture;

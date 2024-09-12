@@ -18,7 +18,7 @@ class Objects {
     float t;
 
   private:
-    std::shared_ptr<Mesh> mesh;
+    std::shared_ptr<Mesh<glm::vec3>> mesh;
 
     std::vector<GLuint> indices;
     std::vector<glm::vec3> vertices;
