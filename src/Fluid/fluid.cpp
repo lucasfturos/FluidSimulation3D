@@ -10,9 +10,21 @@ Fluid::Fluid(glm::mat4 projection)
                           glm::vec3(0.0f, 1.0f, 0.0f))),
       projMat(projection), gravity(glm::vec3(0, 9.81f, 0)), t(0.0f) {}
 
-void Fluid::setTime(float time) { t = time; }
+void Fluid::setup() {
+    mesh = std::make_shared<Mesh>(cubeVertices, cubeIndices,
+                                  "assets/shader/Fluid/vertex.shader",
+                                  "assets/shader/Fluid/fragment.shader");
+    mesh->setup<GLfloat>({3});
 
-void Fluid::setSimulationParams(SimulationParams p) { params = p; }
+    Mesh::UniformsMap uniforms = {
+        {"uDensity", [](std::shared_ptr<Shader> shader) {
+             shader->setUniform1i("uDensity", 0);
+         }}};
+    mesh->setUniforms(uniforms);
+
+    auto texture = std::make_shared<Texture>(N, N, N, GL_RGB, GL_FLOAT);
+    mesh->setTexture(texture);
+}
 
 void Fluid::drawDensity() {
     colors.clear();
@@ -31,25 +43,7 @@ void Fluid::drawDensity() {
         }
     }
 
-    texture->updateData(colors, N, N, N, GL_RGB, GL_FLOAT);
-}
-
-void Fluid::setup() {
-    va = std::make_shared<VertexArray>();
-    vb = std::make_shared<VertexBuffer<glm::vec3>>(cubeVertices);
-    ib = std::make_shared<IndexBuffer>(cubeIndices);
-
-    VertexBufferLayout layout;
-    layout.push<GLfloat>(3);
-    va->addBuffer(*vb, layout);
-
-    shader = std::make_shared<Shader>("assets/shader/Fluid/vertex.shader",
-                                      "assets/shader/Fluid/fragment.shader");
-    texture = std::make_shared<Texture>(N, N, N, GL_RGB, GL_FLOAT);
-
-    shader->bind();
-    shader->setUniform1i("uDensity", 0);
-    shader->unbind();
+    mesh->updateTexture(colors, N, N, N);
 }
 
 void Fluid::run() {
@@ -57,31 +51,19 @@ void Fluid::run() {
     setupFluidDynamics();
     drawDensity();
 
-    shader->bind();
+    Mesh::UniformsMap uniforms = {
+        {"uMVP",
+         [this](std::shared_ptr<Shader> shader) {
+             glm::mat4 model = glm::mat4(1.0f);
+             glm::vec3 scale(0.3f);
+             model = glm::scale(model, scale);
+             float angle = t * glm::radians(90.0f);
+             model *= glm::rotate(glm::mat4(1.0f), angle, {1.0f, 1.0f, 0.0f});
+             glm::mat4 mvp = projMat * viewMat * model;
+             shader->setUniformMat4f("uMVP", mvp);
+         }},
+    };
+    mesh->setUniforms(uniforms);
 
-    glm::mat4 model = glm::mat4(1.0f);
-    glm::vec3 scale(0.3f);
-    model = glm::scale(model, scale);
-    float angle = t * glm::radians(90.0f);
-    model *= glm::rotate(glm::mat4(1.0f), angle, {1.0f, 1.0f, 0.0f});
-    glm::mat4 mvp = projMat * viewMat * model;
-    shader->setUniformMat4f("uMVP", mvp);
-
-    glm::mat3 modelMat3 = glm::mat3(model);
-    glm::mat3 viewMat3 = glm::mat3(viewMat);
-    glm::mat3 normalMatrix = glm::transpose(glm::inverse(modelMat3)) * viewMat3;
-    shader->setUniformMat3f("uNormalMatrix", normalMatrix);
-
-    va->bind();
-    vb->bind();
-    ib->bind();
-    texture->bind(0);
-
-    glDrawElements(GL_TRIANGLES, cubeIndices.size(), GL_UNSIGNED_INT, nullptr);
-
-    va->unbind();
-    vb->unbind();
-    ib->unbind();
-    shader->unbind();
-    texture->unbind();
+    mesh->draw();
 }

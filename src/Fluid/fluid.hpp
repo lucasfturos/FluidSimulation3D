@@ -2,10 +2,7 @@
 
 #include "Common/perlin.hpp"
 #include "Common/util.hpp"
-#include "GLObjects/index_buffer.hpp"
-#include "GLObjects/shader.hpp"
-#include "GLObjects/texture.hpp"
-#include "GLObjects/vertex_array.hpp"
+#include "GLObjects/mesh.hpp"
 #include "Objects/cube.hpp"
 
 #include <algorithm>
@@ -35,13 +32,8 @@ class Fluid {
     float t;
 
   private:
+    std::shared_ptr<Mesh> mesh;
     SimulationParams params;
-
-    std::shared_ptr<VertexArray> va;
-    std::shared_ptr<VertexBuffer<glm::vec3>> vb;
-    std::shared_ptr<IndexBuffer> ib;
-    std::shared_ptr<Shader> shader;
-    std::shared_ptr<Texture> texture;
 
     void drawDensity();
     void draw();
@@ -71,8 +63,9 @@ class Fluid {
   public:
     Fluid(glm::mat4);
 
-    void setTime(float);
-    void setSimulationParams(SimulationParams);
+    void setTime(float time) { t = time; }
+    void setSimulationParams(SimulationParams p) { params = p; }
+
     void setup();
     void run();
 };

@@ -1,9 +1,7 @@
 #pragma once
 
 #include "Common/util.hpp"
-#include "GLObjects/index_buffer.hpp"
-#include "GLObjects/shader.hpp"
-#include "GLObjects/vertex_array.hpp"
+#include "GLObjects/mesh.hpp"
 #include "Objects/cylinder.hpp"
 #include "Objects/sphere.hpp"
 
@@ -20,10 +18,7 @@ class Objects {
     float t;
 
   private:
-    std::shared_ptr<VertexArray> va;
-    std::shared_ptr<VertexBuffer<glm::vec3>> vb;
-    std::shared_ptr<IndexBuffer> ib;
-    std::shared_ptr<Shader> shader;
+    std::shared_ptr<Mesh> mesh;
 
     std::vector<GLuint> indices;
     std::vector<glm::vec3> vertices;
@@ -33,8 +28,15 @@ class Objects {
   public:
     Objects(glm::mat4, glm::mat4);
 
-    void setObjectType(ObjectType);
-    void setTime(float);
+    void setObjectType(ObjectType type) {
+        if (objectType != type) {
+            objectType = type;
+            update();
+        }
+    }
+
+    void setTime(float time) { t = time; }
+
     void setup();
     void run();
 };

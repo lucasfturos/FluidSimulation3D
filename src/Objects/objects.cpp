@@ -7,15 +7,6 @@ Objects::Objects(glm::mat4 view, glm::mat4 projection)
       sphere(std::make_shared<Sphere>(5, 20)), objectType(ObjectType::None),
       viewMat(view), projMat(projection), t(0.0f) {}
 
-void Objects::setObjectType(ObjectType type) {
-    if (objectType != type) {
-        objectType = type;
-        update();
-    }
-}
-
-void Objects::setTime(float time) { t = time; }
-
 void Objects::update() {
     vertices.clear();
     indices.clear();
@@ -42,17 +33,10 @@ void Objects::update() {
         break;
     }
 
-    va = std::make_shared<VertexArray>();
-    vb = std::make_shared<VertexBuffer<glm::vec3>>(vertices);
-    ib = std::make_shared<IndexBuffer>(indices);
-
-    VertexBufferLayout layout;
-    layout.push<GLfloat>(3);
-
-    va->addBuffer(*vb, layout);
-
-    shader = std::make_shared<Shader>("assets/shader/Basic/vertex.shader",
-                                      "assets/shader/Basic/fragment.shader");
+    mesh = std::make_shared<Mesh>(vertices, indices,
+                                  "assets/shader/Basic/vertex.shader",
+                                  "assets/shader/Basic/fragment.shader");
+    mesh->setup<GLfloat>({3});
 }
 
 void Objects::setup() { update(); }
@@ -62,33 +46,27 @@ void Objects::run() {
         return;
     }
 
-    shader->bind();
+    Mesh::UniformsMap uniforms = {
+        {"uMVP",
+         [this](std::shared_ptr<Shader> shader) {
+             glm::mat4 model = glm::mat4(1.0f);
+             glm::vec3 translation(8.0f, 0.0f, 0.0f);
+             model = glm::translate(model, translation);
 
-    glm::mat4 model = glm::mat4(1.0f);
+             float scaleFactor = 1.0f;
+             glm::vec3 scale(scaleFactor);
+             model = glm::scale(model, scale);
 
-    glm::vec3 translation(8.0f, 0.0f, 0.0f);
-    model = glm::translate(model, translation);
+             float angle = t * glm::radians(90.0f);
+             glm::mat4 rotationMatrix = glm::rotate(
+                 glm::mat4(1.0f), angle, glm::vec3(1.0f, 1.0f, 0.0f));
+             model *= rotationMatrix;
 
-    float scaleFactor = 1.0f;
-    glm::vec3 scale(scaleFactor);
-    model = glm::scale(model, scale);
+             glm::mat4 mvp = projMat * viewMat * model;
+             shader->setUniformMat4f("uMVP", mvp);
+         }},
+    };
 
-    float angle = t * glm::radians(90.0f);
-    glm::mat4 rotationMatrix =
-        glm::rotate(glm::mat4(1.0f), angle, glm::vec3(1.0f, 1.0f, 0.0f));
-
-    glm::mat4 mvp = projMat * viewMat * model * rotationMatrix;
-
-    shader->setUniformMat4f("uMVP", mvp);
-
-    va->bind();
-    vb->bind();
-    ib->bind();
-
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
-
-    va->unbind();
-    vb->unbind();
-    ib->unbind();
-    shader->unbind();
+    mesh->setUniforms(uniforms);
+    mesh->draw();
 }

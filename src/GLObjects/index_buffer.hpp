@@ -6,12 +6,14 @@
 class IndexBuffer {
   private:
     GLuint m_RendererID;
+    GLsizei m_Count;
 
   public:
-    IndexBuffer(const std::vector<GLuint> &data) : m_RendererID(0) {
+    IndexBuffer(const std::vector<GLuint> &data)
+        : m_RendererID(0), m_Count(static_cast<GLsizei>(data.size())) {
         glGenBuffers(1, &m_RendererID);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.size() * sizeof(GLuint),
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Count * sizeof(GLuint),
                      data.data(), GL_DYNAMIC_DRAW);
     }
 
@@ -23,6 +25,7 @@ class IndexBuffer {
     IndexBuffer(IndexBuffer &&other) noexcept
         : m_RendererID(other.m_RendererID) {
         other.m_RendererID = 0;
+        other.m_Count = 0;
     }
 
     IndexBuffer &operator=(IndexBuffer &&other) noexcept {
@@ -30,6 +33,7 @@ class IndexBuffer {
             glDeleteBuffers(1, &m_RendererID);
             m_RendererID = other.m_RendererID;
             other.m_RendererID = 0;
+            other.m_Count = 0;
         }
         return *this;
     }
@@ -43,4 +47,6 @@ class IndexBuffer {
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0,
                         data.size() * sizeof(GLuint), data.data());
     }
+
+    GLsizei getCount() const { return m_Count; }
 };
