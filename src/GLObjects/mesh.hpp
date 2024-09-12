@@ -4,12 +4,9 @@
 #include "shader.hpp"
 #include "texture.hpp"
 #include "vertex_array.hpp"
+
 #include <functional>
-#include <glm/glm.hpp>
 #include <memory>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
 class Mesh {
   public:
