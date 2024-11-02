@@ -171,7 +171,7 @@ void Fluid::advect(int b, std::vector<float> &d, const std::vector<float> &d0,
 
 void Fluid::linSolve(int b, std::vector<float> &x, const std::vector<float> &x0,
                      float a, float c) {
-    int iter = params.iter;
+    int iter = m_SimulParams.iter;
     float cRecip = 1.0f / c;
     for (int m = 0; m < iter; ++m) {
         for (int k = 1; k < N - 1; ++k) {

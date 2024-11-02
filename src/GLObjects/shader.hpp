@@ -16,20 +16,20 @@ struct ShaderProgramSource {
 
 class Shader {
   private:
-    GLuint m_bufferID;
-    std::unordered_map<std::string, GLint> m_uniformLocationCache;
+    GLuint m_BufferID;
+    std::unordered_map<std::string, GLint> m_UniformLocationCache;
 
   public:
     Shader(const std::string &vertexPath, const std::string &fragmentPath)
-        : m_bufferID(0) {
+        : m_BufferID(0) {
         std::string vertexSource = loadShader(vertexPath);
         std::string fragmentSource = loadShader(fragmentPath);
-        m_bufferID = createShader(vertexSource, fragmentSource);
+        m_BufferID = createShader(vertexSource, fragmentSource);
     }
 
-    ~Shader() { glDeleteProgram(m_bufferID); }
+    ~Shader() { glDeleteProgram(m_BufferID); }
 
-    void bind() const { glUseProgram(m_bufferID); }
+    void bind() const { glUseProgram(m_BufferID); }
     void unbind() const { glUseProgram(0); }
 
     void setUniform1i(const std::string &name, GLint value) {
@@ -122,16 +122,16 @@ class Shader {
     }
 
     GLint getUniformLocation(const std::string &name) {
-        if (m_uniformLocationCache.find(name) != m_uniformLocationCache.end()) {
-            return m_uniformLocationCache[name];
+        if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end()) {
+            return m_UniformLocationCache[name];
         }
 
-        GLint location = glGetUniformLocation(m_bufferID, name.c_str());
+        GLint location = glGetUniformLocation(m_BufferID, name.c_str());
         if (location == -1) {
             std::cerr << "Warning: Uniform '" << name << "' doesn't exist!\n";
         }
 
-        m_uniformLocationCache[name] = location;
+        m_UniformLocationCache[name] = location;
         return location;
     }
 };

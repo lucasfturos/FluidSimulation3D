@@ -1,34 +1,34 @@
 #include "fluid.hpp"
 
 void Fluid::step() {
-    float dt = params.dt;
-    float viscosity = params.viscosity;
-    float diffusion = params.diffusion;
-    bool activeGravity = params.activeGravity;
-    float gravityScale = params.gravityScale;
+    float dt = m_SimulParams.dt;
+    float viscosity = m_SimulParams.viscosity;
+    float diffusion = m_SimulParams.diffusion;
+    bool activeGravity = m_SimulParams.activeGravity;
+    float gravityScale = m_SimulParams.gravityScale;
 
     if (activeGravity) {
-        for (int i = 0; i < nSize; ++i) {
-            Vx[i] += gravity.x * dt * gravityScale;
-            Vy[i] += gravity.y * dt * gravityScale;
-            Vz[i] += gravity.z * dt * gravityScale;
+        for (int i = 0; i < m_nSize; ++i) {
+            m_Vx[i] += m_Gravity.x * dt * gravityScale;
+            m_Vy[i] += m_Gravity.y * dt * gravityScale;
+            m_Vz[i] += m_Gravity.z * dt * gravityScale;
         }
     }
 
-    diffuse(1, Vx0, Vx, viscosity, dt);
-    diffuse(2, Vy0, Vy, viscosity, dt);
-    diffuse(3, Vz0, Vz, viscosity, dt);
+    diffuse(1, m_Vx0, m_Vx, viscosity, dt);
+    diffuse(2, m_Vy0, m_Vy, viscosity, dt);
+    diffuse(3, m_Vz0, m_Vz, viscosity, dt);
 
-    project(Vx0, Vy0, Vz0, Vx, Vy);
+    project(m_Vx0, m_Vy0, m_Vz0, m_Vx, m_Vy);
 
-    advect(1, Vx, Vx0, Vx0, Vy0, Vz0, dt);
-    advect(2, Vy, Vy0, Vx0, Vy0, Vz0, dt);
-    advect(3, Vz, Vz0, Vx0, Vy0, Vz0, dt);
+    advect(1, m_Vx, m_Vx0, m_Vx0, m_Vy0, m_Vz0, dt);
+    advect(2, m_Vy, m_Vy0, m_Vx0, m_Vy0, m_Vz0, dt);
+    advect(3, m_Vz, m_Vz0, m_Vx0, m_Vy0, m_Vz0, dt);
 
-    project(Vx, Vy, Vz, Vx0, Vy0);
+    project(m_Vx, m_Vy, m_Vz, m_Vx0, m_Vy0);
 
-    diffuse(0, s, density, diffusion, dt);
-    advect(0, density, s, Vx, Vy, Vz, dt);
+    diffuse(0, m_TempDensity, m_Density, diffusion, dt);
+    advect(0, m_Density, m_TempDensity, m_Vx, m_Vy, m_Vz, dt);
 
     fadeDensity();
 }
@@ -49,7 +49,7 @@ void Fluid::setupFluidDynamics() {
 
         float noiseScale = 0.5f;
         for (auto i = 0; i < 8; ++i) {
-            float noiseValue = perlin->noise({
+            float noiseValue = m_PerlinNoise->noise({
                 vertex.x * noiseScale,
                 vertex.y * noiseScale,
                 vertex.z * noiseScale,
@@ -58,21 +58,21 @@ void Fluid::setupFluidDynamics() {
             float vX = std::cos(angle) * 0.1f;
             float vY = std::sin(angle) * 0.1f;
             addVelocity(vertex, {vX, vY, 1.0f});
-            addTurbulence(vertex, t, {vX, vY, 1.0f});
+            addTurbulence(vertex, m_Time, {vX, vY, 1.0f});
         }
     }
 }
 
 void Fluid::addDensity(glm::ivec3 pos, float amount) {
     int index = IX(pos.x, pos.y, pos.z);
-    density[index] += amount;
+    m_Density[index] += amount;
 }
 
 void Fluid::addVelocity(glm::ivec3 pos, glm::vec3 amount) {
     int index = IX(pos.x, pos.y, pos.z);
-    Vx[index] += amount.x;
-    Vy[index] += amount.y;
-    Vz[index] += amount.z;
+    m_Vx[index] += amount.x;
+    m_Vy[index] += amount.y;
+    m_Vz[index] += amount.z;
 }
 
 void Fluid::addTurbulence(glm::ivec3 pos, float t, glm::vec3 amount) {
@@ -85,21 +85,24 @@ void Fluid::addTurbulence(glm::ivec3 pos, float t, glm::vec3 amount) {
     float ny = 2 * static_cast<float>(pos.y) * noiseScale;
     float nz = 2 * static_cast<float>(pos.z) * noiseScale;
 
-    float noiseValueX = perlin->noise(glm::vec3(nx, t, 0)) +
-                        noiseWeight * perlin->noise(glm::vec3(nx, 2 * t, 0));
-    float noiseValueY = perlin->noise(glm::vec3(ny, t, 0)) +
-                        noiseWeight * perlin->noise(glm::vec3(ny, 2 * t, 0));
-    float noiseValueZ = perlin->noise(glm::vec3(nz, t, 0)) +
-                        noiseWeight * perlin->noise(glm::vec3(nz, 2 * t, 0));
+    float noiseValueX =
+        m_PerlinNoise->noise(glm::vec3(nx, t, 0)) +
+        noiseWeight * m_PerlinNoise->noise(glm::vec3(nx, 2 * t, 0));
+    float noiseValueY =
+        m_PerlinNoise->noise(glm::vec3(ny, t, 0)) +
+        noiseWeight * m_PerlinNoise->noise(glm::vec3(ny, 2 * t, 0));
+    float noiseValueZ =
+        m_PerlinNoise->noise(glm::vec3(nz, t, 0)) +
+        noiseWeight * m_PerlinNoise->noise(glm::vec3(nz, 2 * t, 0));
 
-    Vx[index] += amount.x * (1.0f + turbulenceStrength * noiseValueX);
-    Vy[index] += amount.y * (1.0f + turbulenceStrength * noiseValueY);
-    Vz[index] += amount.z * (1.0f + turbulenceStrength * noiseValueZ);
+    m_Vx[index] += amount.x * (1.0f + turbulenceStrength * noiseValueX);
+    m_Vy[index] += amount.y * (1.0f + turbulenceStrength * noiseValueY);
+    m_Vz[index] += amount.z * (1.0f + turbulenceStrength * noiseValueZ);
 }
 
 void Fluid::fadeDensity() {
-    float fadeRate = params.fadeRate;
-    for (std::size_t i = 0; i < density.size(); ++i) {
-        density[i] = std::max(density[i] - fadeRate, 0.0f);
+    float fadeRate = m_SimulParams.fadeRate;
+    for (std::size_t i = 0; i < m_Density.size(); ++i) {
+        m_Density[i] = std::max(m_Density[i] - fadeRate, 0.0f);
     }
 }

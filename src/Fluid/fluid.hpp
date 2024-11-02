@@ -14,27 +14,29 @@
 class Fluid {
   protected:
     const int N = 25;
-    const int nSize = N * N * N;
+    const int m_nSize = N * N * N;
+    const glm::mat4 m_ViewMatrix =
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 1.5f), glm::vec3(0.0f, 0.0f, 0.0f),
+                    glm::vec3(0.0f, 1.0f, 0.0f));
 
   private:
-    std::shared_ptr<Perlin> perlin;
+    std::shared_ptr<Perlin> m_PerlinNoise;
 
-    std::vector<float> s;
-    std::vector<float> density;
-    std::vector<float> Vx, Vy, Vz;
-    std::vector<float> Vx0, Vy0, Vz0;
-    std::vector<float> colors;
+    std::vector<float> m_TempDensity;
+    std::vector<float> m_Density;
+    std::vector<float> m_Vx, m_Vy, m_Vz;
+    std::vector<float> m_Vx0, m_Vy0, m_Vz0;
+    std::vector<float> m_Colors;
 
-    glm::mat4 viewMat;
-    glm::mat4 projMat;
-    glm::mat4 modelMat;
-    glm::vec3 gravity;
+    glm::mat4 m_ProjMattrix;
+    glm::mat4 m_ModelMatrix;
+    glm::vec3 m_Gravity;
 
-    float t;
+    float m_Time;
 
   private:
-    std::shared_ptr<Mesh<glm::vec3>> mesh;
-    SimulationParams params;
+    std::shared_ptr<Mesh<glm::vec3>> m_Mesh;
+    SimulationParams m_SimulParams;
 
     void drawDensity();
     void draw();
@@ -64,8 +66,10 @@ class Fluid {
   public:
     Fluid(glm::mat4);
 
-    void setTime(float time) { t = time; }
-    void setSimulationParams(SimulationParams p) { params = p; }
+    void setTime(float time) { m_Time = time; }
+    void setSimulationParams(SimulationParams params) {
+        m_SimulParams = params;
+    }
 
     void setup();
     void run();

@@ -17,15 +17,15 @@ struct CustomVertex {
 template <typename VertexType> class Mesh {
   public:
     Mesh(const std::vector<VertexType> &vertices,
-         const std::vector<GLuint> &indices,
-         const std::string &vertexShaderPath,
+         const std::vector<GLuint> &faces, const std::string &vertexShaderPath,
          const std::string &fragmentShaderPath)
-        : va(std::make_shared<VertexArray>()),
-          vb(std::make_shared<VertexBuffer<VertexType>>(vertices)),
-          ib(std::make_shared<IndexBuffer>(indices)),
-          shader(
+        : m_VertexArray(std::make_shared<VertexArray>()),
+          m_VerticesBuffer(
+              std::make_shared<VertexBuffer<VertexType>>(vertices)),
+          m_FacesBuffer(std::make_shared<IndexBuffer>(faces)),
+          m_Shader(
               std::make_shared<Shader>(vertexShaderPath, fragmentShaderPath)),
-          hasTexture(false) {}
+          m_HasTexture(false) {}
 
     using UniformsMap =
         std::unordered_map<std::string,
@@ -37,55 +37,56 @@ template <typename VertexType> class Mesh {
         for (int size : attributeSizes) {
             layout.push<LayoutType>(size);
         }
-        va->addBuffer(*vb, layout);
+        m_VertexArray->addBuffer(*m_VerticesBuffer, layout);
     }
 
     void setUniforms(const UniformsMap &uniforms) {
-        shader->bind();
+        m_Shader->bind();
         for (const auto &[name, setUniform] : uniforms) {
-            setUniform(shader);
+            setUniform(m_Shader);
         }
-        shader->unbind();
+        m_Shader->unbind();
     }
 
     void draw(unsigned int slot = 0) {
-        shader->bind();
-        va->bind();
-        vb->bind();
-        ib->bind();
+        m_Shader->bind();
+        m_VertexArray->bind();
+        m_VerticesBuffer->bind();
+        m_FacesBuffer->bind();
 
-        if (hasTexture && texture) {
-            texture->bind(slot);
+        if (m_HasTexture && m_Texture) {
+            m_Texture->bind(slot);
         }
 
-        glDrawElements(GL_TRIANGLES, ib->getCount(), GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GL_TRIANGLES, m_FacesBuffer->getCount(), GL_UNSIGNED_INT,
+                       nullptr);
 
-        va->unbind();
-        vb->unbind();
-        ib->unbind();
-        shader->unbind();
-        if (hasTexture) {
-            texture->unbind();
+        m_VertexArray->unbind();
+        m_VerticesBuffer->unbind();
+        m_FacesBuffer->unbind();
+        m_Shader->unbind();
+        if (m_HasTexture) {
+            m_Texture->unbind();
         }
     }
 
     void updateTexture(const std::vector<float> &data, int width, int height,
                        int depth) {
-        if (texture) {
-            texture->updateData(data, width, height, depth, GL_RGB, GL_FLOAT);
+        if (m_Texture) {
+            m_Texture->updateData(data, width, height, depth, GL_RGB, GL_FLOAT);
         }
     }
 
     void setTexture(std::shared_ptr<Texture> newTexture) {
-        texture = newTexture;
-        hasTexture = (texture != nullptr);
+        m_Texture = newTexture;
+        m_HasTexture = (m_Texture != nullptr);
     }
 
   private:
-    std::shared_ptr<VertexArray> va;
-    std::shared_ptr<VertexBuffer<VertexType>> vb;
-    std::shared_ptr<IndexBuffer> ib;
-    std::shared_ptr<Shader> shader;
-    std::shared_ptr<Texture> texture;
-    bool hasTexture;
+    std::shared_ptr<VertexArray> m_VertexArray;
+    std::shared_ptr<VertexBuffer<VertexType>> m_VerticesBuffer;
+    std::shared_ptr<IndexBuffer> m_FacesBuffer;
+    std::shared_ptr<Shader> m_Shader;
+    std::shared_ptr<Texture> m_Texture;
+    bool m_HasTexture;
 };

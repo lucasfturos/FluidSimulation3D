@@ -2,50 +2,55 @@
 #include "Common/color.hpp"
 
 Fluid::Fluid(glm::mat4 projection)
-    : perlin(std::make_shared<Perlin>()), s(nSize, 0.0f), density(nSize, 0.0f),
-      Vx(nSize, 0.0f), Vy(nSize, 0.0f), Vz(nSize, 0.0f), Vx0(nSize, 0.0f),
-      Vy0(nSize, 0.0f), Vz0(nSize, 0.0f), colors(nSize * 3, 0.0f),
-      viewMat(glm::lookAt(glm::vec3(0.0f, 0.0f, 1.5f),
-                          glm::vec3(0.0f, 0.0f, 0.0f),
-                          glm::vec3(0.0f, 1.0f, 0.0f))),
-      projMat(projection), modelMat(0), gravity(glm::vec3(0, 9.81f, 0)),
-      t(0.0f) {}
+    : m_PerlinNoise(std::make_shared<Perlin>()), m_TempDensity(m_nSize, 0.0f),
+      m_Density(m_nSize, 0.0f), m_Vx(m_nSize, 0.0f), m_Vy(m_nSize, 0.0f),
+      m_Vz(m_nSize, 0.0f), m_Vx0(m_nSize, 0.0f), m_Vy0(m_nSize, 0.0f),
+      m_Vz0(m_nSize, 0.0f), m_Colors(m_nSize * 3, 0.0f),
+      m_ProjMattrix(projection), m_ModelMatrix(0),
+      m_Gravity(glm::vec3(0, 9.81f, 0)), m_Time(0.0f) {}
 
 void Fluid::setup() {
-    mesh = std::make_shared<Mesh<glm::vec3>>(
-        cubeVertices, cubeIndices, "assets/shader/Fluid/vertex.shader",
-        "assets/shader/Fluid/fragment.shader");
-    mesh->setup<GLfloat>({3});
+    std::string vertexSrc = "assets/shader/Fluid/vertex.shader";
+    std::string fragmentSrc = "assets/shader/Fluid/fragment.shader";
+    m_Mesh = std::make_shared<Mesh<glm::vec3>>(cubeVertices, cubeIndices,
+                                               vertexSrc, fragmentSrc);
+    m_Mesh->setup<GLfloat>({3});
 
-    Mesh<glm::vec3>::UniformsMap uniforms = {
-        {"uDensity", [](std::shared_ptr<Shader> shader) {
-             shader->setUniform1i("uDensity", 0);
-         }}};
-    mesh->setUniforms(uniforms);
+    Mesh<glm::vec3>::UniformsMap uniforms;
+
+    uniforms["uDensity"] = [](std::shared_ptr<Shader> shader) {
+        shader->setUniform1i("uDensity", 0);
+    };
+    uniforms["uCameraPosition"] = [this](std::shared_ptr<Shader> shader) {
+        glm::vec3 cameraPos = glm::vec3(glm::inverse(m_ViewMatrix)[3]);
+        shader->setUniform3f("uCameraPosition", cameraPos);
+    };
+
+    m_Mesh->setUniforms(uniforms);
 
     auto texture =
         std::make_shared<Texture>(N, N, N, GL_RGB, GL_FLOAT, GL_TEXTURE_3D);
-    mesh->setTexture(texture);
+    m_Mesh->setTexture(texture);
 }
 
 void Fluid::drawDensity() {
-    colors.clear();
+    m_Colors.clear();
     for (int z = 0; z < N; ++z) {
         for (int y = 0; y < N; ++y) {
             for (int x = 0; x < N; ++x) {
                 int index = IX(x, y, z);
-                float d = density[index];
+                float d = m_Density[index];
                 auto color = getColorByValue(std::fmod((d + 50), 255.0f),
                                              100 / 255.0f, d / 255.0f);
                 int colorIndex = index * 3;
-                colors[colorIndex + 0] = color.r;
-                colors[colorIndex + 1] = color.g;
-                colors[colorIndex + 2] = color.b;
+                m_Colors[colorIndex + 0] = color.r;
+                m_Colors[colorIndex + 1] = color.g;
+                m_Colors[colorIndex + 2] = color.b;
             }
         }
     }
 
-    mesh->updateTexture(colors, N, N, N);
+    m_Mesh->updateTexture(m_Colors, N, N, N);
 }
 
 void Fluid::run() {
@@ -53,29 +58,23 @@ void Fluid::run() {
     setupFluidDynamics();
     drawDensity();
 
-    Mesh<glm::vec3>::UniformsMap uniforms = {
-        {"uMVP",
-         [this](std::shared_ptr<Shader> shader) {
-             glm::mat4 model = glm::mat4(1.0f);
-             glm::vec3 scale(0.4f);
-             model = glm::scale(model, scale);
-             float angle = t * glm::radians(90.0f);
-             model *= glm::rotate(glm::mat4(1.0f), angle, {1.0f, 1.0f, 0.0f});
-             modelMat = model;
-             glm::mat4 mvp = projMat * viewMat * model;
-             shader->setUniformMat4f("uMVP", mvp);
-         }},
-        {"uModel",
-         [this](std::shared_ptr<Shader> shader) {
-             shader->setUniformMat4f("uModel", modelMat);
-         }},
-        {"uCameraPosition",
-         [this](std::shared_ptr<Shader> shader) {
-             glm::vec3 cameraPos = glm::vec3(glm::inverse(viewMat)[3]);
-             shader->setUniform3f("uCameraPosition", cameraPos);
-         }},
-    };
-    mesh->setUniforms(uniforms);
+    Mesh<glm::vec3>::UniformsMap uniforms;
 
-    mesh->draw();
+    uniforms["uMVP"] = [this](std::shared_ptr<Shader> shader) {
+        glm::mat4 model = glm::mat4(1.0f);
+        glm::vec3 scale(0.4f);
+        model = glm::scale(model, scale);
+        float angle = m_Time * glm::radians(90.0f);
+        model *= glm::rotate(glm::mat4(1.0f), angle, {1.0f, 1.0f, 0.0f});
+        m_ModelMatrix = model;
+        glm::mat4 mvp = m_ProjMattrix * m_ViewMatrix * model;
+        shader->setUniformMat4f("uMVP", mvp);
+    };
+    uniforms["uModel"] = [this](std::shared_ptr<Shader> shader) {
+        shader->setUniformMat4f("uModel", m_ModelMatrix);
+    };
+
+    m_Mesh->setUniforms(uniforms);
+
+    m_Mesh->draw();
 }
