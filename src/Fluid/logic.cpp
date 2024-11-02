@@ -4,12 +4,16 @@ void Fluid::step() {
     float dt = params.dt;
     float viscosity = params.viscosity;
     float diffusion = params.diffusion;
+    bool activeGravity = params.activeGravity;
+    float gravityScale = params.gravityScale;
 
-    // for (int i = 0; i < nSize; ++i) {
-    //     Vx[i] += gravity.x * dt;
-    //     Vy[i] += gravity.y * dt;
-    //     Vz[i] += gravity.z * dt;
-    // }
+    if (activeGravity) {
+        for (int i = 0; i < nSize; ++i) {
+            Vx[i] += gravity.x * dt * gravityScale;
+            Vy[i] += gravity.y * dt * gravityScale;
+            Vz[i] += gravity.z * dt * gravityScale;
+        }
+    }
 
     diffuse(1, Vx0, Vx, viscosity, dt);
     diffuse(2, Vy0, Vy, viscosity, dt);

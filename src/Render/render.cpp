@@ -4,15 +4,15 @@ Render::Render()
     : window(nullptr), context(nullptr),
       fluid(std::make_shared<Fluid>(projDefaultMat)),
       objects(std::make_shared<Objects>(viewDefaultMat, projDefaultMat)),
-      controlPanel(std::make_shared<ControlPanel>()), quit(false) {
-    setupWindow();
-    initOpenGL();
-    setupImGui();
-}
+      controlPanel(std::make_shared<ControlPanel>()), quit(false) {}
 
 Render::~Render() { destroyWindow(); }
 
 void Render::setup() {
+    setupWindow();
+    initOpenGL();
+    setupImGui();
+
     controlPanel->setup();
     objects->setup();
     fluid->setup();

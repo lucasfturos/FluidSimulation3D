@@ -8,7 +8,8 @@ Fluid::Fluid(glm::mat4 projection)
       viewMat(glm::lookAt(glm::vec3(0.0f, 0.0f, 1.5f),
                           glm::vec3(0.0f, 0.0f, 0.0f),
                           glm::vec3(0.0f, 1.0f, 0.0f))),
-      projMat(projection), gravity(glm::vec3(0, 9.81f, 0)), t(0.0f) {}
+      projMat(projection), modelMat(0), gravity(glm::vec3(0, 9.81f, 0)),
+      t(0.0f) {}
 
 void Fluid::setup() {
     mesh = std::make_shared<Mesh<glm::vec3>>(
@@ -56,12 +57,22 @@ void Fluid::run() {
         {"uMVP",
          [this](std::shared_ptr<Shader> shader) {
              glm::mat4 model = glm::mat4(1.0f);
-             glm::vec3 scale(0.3f);
+             glm::vec3 scale(0.4f);
              model = glm::scale(model, scale);
              float angle = t * glm::radians(90.0f);
              model *= glm::rotate(glm::mat4(1.0f), angle, {1.0f, 1.0f, 0.0f});
+             modelMat = model;
              glm::mat4 mvp = projMat * viewMat * model;
              shader->setUniformMat4f("uMVP", mvp);
+         }},
+        {"uModel",
+         [this](std::shared_ptr<Shader> shader) {
+             shader->setUniformMat4f("uModel", modelMat);
+         }},
+        {"uCameraPosition",
+         [this](std::shared_ptr<Shader> shader) {
+             glm::vec3 cameraPos = glm::vec3(glm::inverse(viewMat)[3]);
+             shader->setUniform3f("uCameraPosition", cameraPos);
          }},
     };
     mesh->setUniforms(uniforms);

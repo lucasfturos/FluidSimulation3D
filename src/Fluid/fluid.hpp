@@ -27,6 +27,7 @@ class Fluid {
 
     glm::mat4 viewMat;
     glm::mat4 projMat;
+    glm::mat4 modelMat;
     glm::vec3 gravity;
 
     float t;

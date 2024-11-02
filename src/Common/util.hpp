@@ -6,6 +6,8 @@ struct SimulationParams {
     float viscosity;
     float dt;
     float fadeRate;
+    bool activeGravity;
+    float gravityScale;
 };
 
 enum class ObjectType {
