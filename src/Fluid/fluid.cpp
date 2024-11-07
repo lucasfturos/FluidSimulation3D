@@ -64,7 +64,7 @@ void Fluid::run() {
         glm::mat4 model = glm::mat4(1.0f);
         glm::vec3 scale(0.4f);
         model = glm::scale(model, scale);
-        float angle = m_Time * glm::radians(90.0f);
+        float angle = /* m_Time *  */ glm::radians(90.0f);
         model *= glm::rotate(glm::mat4(1.0f), angle, {1.0f, 1.0f, 0.0f});
         m_ModelMatrix = model;
         glm::mat4 mvp = m_ProjMattrix * m_ViewMatrix * model;

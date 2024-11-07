@@ -8,6 +8,7 @@ struct SimulationParams {
     float fadeRate;
     bool activeGravity;
     float gravityScale;
+    bool flowPaused;
 };
 
 enum class ObjectType {

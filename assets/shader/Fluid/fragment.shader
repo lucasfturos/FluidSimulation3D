@@ -32,10 +32,36 @@ bool intersectBox(vec3 rayOrigin, vec3 rayDir, vec3 boxSize, out float tNear, ou
     return tFar > max(tNear, 0.0);
 }
 
+vec3 hsv2rgb(float h, float s, float v) {
+    float c = v * s;
+    float x = c * (1.0 - abs(mod(h / 60.0, 2.0) - 1.0));
+    float m = v - c;
+    
+    vec3 rgb;
+    if (h >= 0.0 && h < 60.0) {
+        rgb = vec3(c, x, 0.0);
+    } else if (h >= 60.0 && h < 120.0) {
+        rgb = vec3(x, c, 0.0);
+    } else if (h >= 120.0 && h < 180.0) {
+        rgb = vec3(0.0, c, x);
+    } else if (h >= 180.0 && h < 240.0) {
+        rgb = vec3(0.0, x, c);
+    } else if (h >= 240.0 && h < 300.0) {
+        rgb = vec3(x, 0.0, c);
+    } else {
+        rgb = vec3(c, 0.0, x);
+    }
+    return rgb + m;
+}
+
+
 void accumulateColorAndAlpha(inout vec4 accumulatedColor,
                              inout float accumulatedAlpha, float density) {
     if (density > EPSILON) {
-        vec3 colorSample = vec3(density);
+        float hue = mod(density * 360.0, 360.0);
+        float saturation = 1.0 - (density * 0.5);
+        float brightness = max(0.2, density);  
+        vec3 colorSample = hsv2rgb(hue, saturation, brightness);
         float alpha = density * opacityFactor;
         accumulatedColor.rgb += (1.0 - accumulatedAlpha) * colorSample * alpha;
         accumulatedAlpha += (1.0 - accumulatedAlpha) * alpha;

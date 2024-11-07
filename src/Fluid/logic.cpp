@@ -64,11 +64,17 @@ void Fluid::setupFluidDynamics() {
 }
 
 void Fluid::addDensity(glm::ivec3 pos, float amount) {
+    if (m_SimulParams.flowPaused)
+        return;
+
     int index = IX(pos.x, pos.y, pos.z);
     m_Density[index] += amount;
 }
 
 void Fluid::addVelocity(glm::ivec3 pos, glm::vec3 amount) {
+    if (m_SimulParams.flowPaused)
+        return;
+
     int index = IX(pos.x, pos.y, pos.z);
     m_Vx[index] += amount.x;
     m_Vy[index] += amount.y;
