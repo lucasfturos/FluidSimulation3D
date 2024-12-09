@@ -1,16 +1,18 @@
 #version 330 core
 
+in vec3 FragPos;
 in vec3 TexCoords;
 out vec4 color;
 
 uniform mat4 uModel;
 uniform sampler3D uDensity;
 uniform vec3 uCameraPosition;
+uniform vec3 uWorldParticlePosition;
 
 const float stepSize = 0.005;
 const int MAX_STEPS = 256;
 const float EPSILON = 1.0e-5;
-const float opacityFactor = 0.3;
+const float opacityFactor = 0.4;
 
 float sdBox(vec3 p, vec3 b) {
     vec3 q = abs(p) - b;
@@ -54,14 +56,17 @@ vec3 hsv2rgb(float h, float s, float v) {
     return rgb + m;
 }
 
-
 void accumulateColorAndAlpha(inout vec4 accumulatedColor,
-                             inout float accumulatedAlpha, float density) {
+                             inout float accumulatedAlpha, float density, vec3 pos) {
     if (density > EPSILON) {
+        float distanceToParticle = length(pos - uWorldParticlePosition);
+        float influence = clamp(1.0 - distanceToParticle, 0.0, 1.0);
+
         float hue = mod(density * 360.0, 360.0);
         float saturation = 1.0 - (density * 0.5);
-        float brightness = max(0.2, density);  
-        vec3 colorSample = hsv2rgb(hue, saturation, brightness);
+        float brightness = max(0.4, density);  
+        vec3 colorSample = hsv2rgb(hue, saturation, brightness) * (0.8 + 0.2 * influence);
+
         float alpha = density * opacityFactor;
         accumulatedColor.rgb += (1.0 - accumulatedAlpha) * colorSample * alpha;
         accumulatedAlpha += (1.0 - accumulatedAlpha) * alpha;
@@ -73,7 +78,7 @@ vec4 rayMarching(vec3 rayOrigin, vec3 rayDirection) {
     float accumulatedAlpha = 0.0;
 
     float tNear, tFar;
-    if (!intersectBox(rayOrigin, rayDirection, vec3(1.0), tNear, tFar)) {
+    if (!intersectBox(rayOrigin, rayDirection, vec3(1.4), tNear, tFar)) {
         return vec4(0.0);
     }
 
@@ -83,7 +88,7 @@ vec4 rayMarching(vec3 rayOrigin, vec3 rayDirection) {
 
         vec3 pos = rayOrigin + t * rayDirection;
         float density = sampleDensity(pos);
-        accumulateColorAndAlpha(accumulatedColor, accumulatedAlpha, density);
+        accumulateColorAndAlpha(accumulatedColor, accumulatedAlpha, density, pos);
 
         t += stepSize;
     }

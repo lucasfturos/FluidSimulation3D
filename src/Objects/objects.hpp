@@ -8,14 +8,20 @@
 #include <memory>
 
 class Objects {
+  protected:
+    const glm::mat4 m_ViewMatrix =
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 1.5f), glm::vec3(0.0f, 0.0f, 0.0f),
+                    glm::vec3(0.0f, 1.0f, 0.0f));
+
   private:
     std::shared_ptr<Cylinder> cylinder;
     std::shared_ptr<Sphere> sphere;
     ObjectType objectType;
 
-    glm::mat4 viewMat;
     glm::mat4 projMat;
-    float t;
+    glm::vec3 position;
+
+    float m_Time;
 
   private:
     std::shared_ptr<Mesh<glm::vec3>> mesh;
@@ -26,7 +32,7 @@ class Objects {
     void update();
 
   public:
-    Objects(glm::mat4, glm::mat4);
+    Objects(glm::mat4);
 
     void setObjectType(ObjectType type) {
         if (objectType != type) {
@@ -34,8 +40,13 @@ class Objects {
             update();
         }
     }
+    void setPosition(const glm::vec3 &newPosition) { position = newPosition; }
+    void setTime(float time) { m_Time = time; }
 
-    void setTime(float time) { t = time; }
+    glm::vec3 getPosition() const { return position; }
+    ObjectType getObjectType() const { return objectType; }
+    std::shared_ptr<Sphere> getSphere() const { return sphere; }
+    std::shared_ptr<Cylinder> getCylinder() const { return cylinder; }
 
     void setup();
     void run();

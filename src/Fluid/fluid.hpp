@@ -4,6 +4,7 @@
 #include "Common/util.hpp"
 #include "GLObjects/mesh.hpp"
 #include "Objects/cube.hpp"
+#include "Objects/objects.hpp"
 
 #include <algorithm>
 #include <fstream>
@@ -37,6 +38,7 @@ class Fluid {
   private:
     std::shared_ptr<Mesh<glm::vec3>> m_Mesh;
     SimulationParams m_SimulParams;
+    glm::vec3 m_ParticlePosition;
 
     void drawDensity();
     void draw();
@@ -48,6 +50,10 @@ class Fluid {
     void addDensity(glm::ivec3, float);
     void addVelocity(glm::ivec3, glm::vec3);
     void addTurbulence(glm::ivec3, float, glm::vec3);
+    bool checkCollisionObject(const glm::vec3 &,
+                              const std::shared_ptr<Objects> &);
+    void applyCollisionResponse(glm::ivec3, const glm::vec3 &,
+                                const std::shared_ptr<Objects> &);
 
     // Util
     int IX(int, int, int);
@@ -70,6 +76,9 @@ class Fluid {
     void setSimulationParams(SimulationParams params) {
         m_SimulParams = params;
     }
+
+    // Logic
+    void detectCollisions(const std::shared_ptr<Objects> &);
 
     void setup();
     void run();

@@ -3,7 +3,7 @@
 Render::Render()
     : window(nullptr), context(nullptr),
       fluid(std::make_shared<Fluid>(projDefaultMat)),
-      objects(std::make_shared<Objects>(viewDefaultMat, projDefaultMat)),
+      objects(std::make_shared<Objects>(projDefaultMat)),
       controlPanel(std::make_shared<ControlPanel>()), quit(false) {}
 
 Render::~Render() { destroyWindow(); }
@@ -27,6 +27,8 @@ void Render::draw() {
 
     fluid->setSimulationParams(controlPanel->getSimulationParams());
     objects->setObjectType(controlPanel->getObjectType());
+
+    fluid->detectCollisions(objects);
 
     objects->run();
     fluid->run();

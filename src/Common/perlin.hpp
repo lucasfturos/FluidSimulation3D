@@ -22,13 +22,10 @@ inline int randomInt(int min, int max) {
 
 class Perlin {
   public:
-    Perlin() {
-        ranvec.resize(point_count);
-        for (int i = 0; i < point_count; ++i) {
-            ranvec[i] = glm::normalize(glm::vec3(
-                randomDouble(-1, 1), randomDouble(-1, 1), randomDouble(-1, 1)));
-        }
-
+    Perlin()
+        : ranvec(point_count, glm::normalize(glm::vec3(randomDouble(-1, 1),
+                                                       randomDouble(-1, 1),
+                                                       randomDouble(-1, 1)))) {
         perm_x = perlinGeneratePerm();
         perm_y = perlinGeneratePerm();
         perm_z = perlinGeneratePerm();

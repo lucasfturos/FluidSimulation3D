@@ -2,10 +2,10 @@
 #include "Objects/cube.hpp"
 #include "Objects/plane.hpp"
 
-Objects::Objects(glm::mat4 view, glm::mat4 projection)
-    : cylinder(std::make_shared<Cylinder>(8, 2, 2, 20)),
-      sphere(std::make_shared<Sphere>(5, 20)), objectType(ObjectType::None),
-      viewMat(view), projMat(projection), t(0.0f) {}
+Objects::Objects(glm::mat4 projection)
+    : cylinder(std::make_shared<Cylinder>(1, 0.3, 0.3, 20)),
+      sphere(std::make_shared<Sphere>(1, 20)), objectType(ObjectType::Sphere),
+      projMat(projection), position(1.0f, 0.0f, 0.0f), m_Time(0.0f) {}
 
 void Objects::update() {
     vertices.clear();
@@ -50,18 +50,17 @@ void Objects::run() {
         {"uMVP",
          [this](std::shared_ptr<Shader> shader) {
              glm::mat4 model = glm::mat4(1.0f);
-             glm::vec3 translation(8.0f, 0.0f, 0.0f);
-             model = glm::translate(model, translation);
+             model = glm::translate(model, position);
 
-             glm::vec3 scale(1.0f);
+             glm::vec3 scale(0.2f);
              model = glm::scale(model, scale);
 
-             float angle = t * glm::radians(90.0f);
+             float angle = m_Time * glm::radians(90.0f);
              glm::mat4 rotationMatrix = glm::rotate(
                  glm::mat4(1.0f), angle, glm::vec3(1.0f, 1.0f, 0.0f));
              model *= rotationMatrix;
 
-             glm::mat4 mvp = projMat * viewMat * model;
+             glm::mat4 mvp = projMat * m_ViewMatrix * model;
              shader->setUniformMat4f("uMVP", mvp);
          }},
     };

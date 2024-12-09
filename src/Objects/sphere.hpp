@@ -47,6 +47,8 @@ class Sphere {
         return vertices;
     }
 
+    GLfloat getRadius() const { return radius; }
+
   private:
     GLfloat radius;
     GLint slices;

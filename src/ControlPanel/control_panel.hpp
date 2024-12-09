@@ -6,7 +6,7 @@
 class ControlPanel {
   protected:
     const int width = 300;
-    const int height = 300;
+    const int height = 345;
 
   private:
     SimulationParams params;

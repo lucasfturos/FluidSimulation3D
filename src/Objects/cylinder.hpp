@@ -60,6 +60,10 @@ class Cylinder {
         return vertices;
     }
 
+    GLfloat getHeight() const { return height; }
+    GLfloat getRadiusTop() const { return radiusTop; }
+    GLfloat getRadiusBottom() const { return radiusBottom; }
+
   private:
     GLfloat height;
     GLfloat radiusTop;

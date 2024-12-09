@@ -2,8 +2,8 @@
 #include <vector>
 
 ControlPanel::ControlPanel()
-    : params({5, 1.0e-5f, 1.0e-6f, 0.1f, 1, false, 1, false}),
-      objectType(ObjectType::None) {}
+    : params({5, 1.0e-5f, 1.0e-6f, 0.1f, 1, false, 1, false, false}),
+      objectType(ObjectType::Sphere) {}
 
 ObjectType ControlPanel::getObjectType() { return objectType; }
 
@@ -31,7 +31,7 @@ void ControlPanel::run() {
                            "%.1f");
         ImGui::PopItemWidth();
         if (ImGui::Button("Reset")) {
-            params = {5, 1.0e-5f, 1.0e-6f, 0.1f, 1, false, 1, false};
+            params = {5, 1.0e-5f, 1.0e-6f, 0.1f, 1, false, 1, false, false};
         }
         ImGui::SameLine();
         if (ImGui::Button("Gravity")) {
@@ -43,7 +43,8 @@ void ControlPanel::run() {
         }
     }
 
-    if (ImGui::CollapsingHeader("Object Selection")) {
+    if (ImGui::CollapsingHeader("Object Selection",
+                                ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::PushItemWidth(200);
         std::vector<const char *> objectTypeNames = {
             "None", "Sphere", "Cylinder", "Plane", "Cube"};
@@ -53,9 +54,13 @@ void ControlPanel::run() {
             objectType = static_cast<ObjectType>(currentType);
         }
         ImGui::PopItemWidth();
-        ImGui::SameLine();
         if (ImGui::Button("Default")) {
             objectType = ObjectType::None;
+            params.collisionDetection = false;
+        }
+        ImGui::SameLine();
+        if (ImGui::Button("Colision")) {
+            params.collisionDetection = !params.collisionDetection;
         }
     }
 

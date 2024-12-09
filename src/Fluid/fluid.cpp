@@ -1,5 +1,4 @@
 #include "fluid.hpp"
-#include "Common/color.hpp"
 
 Fluid::Fluid(glm::mat4 projection)
     : m_PerlinNoise(std::make_shared<Perlin>()), m_TempDensity(m_nSize, 0.0f),
@@ -38,14 +37,14 @@ void Fluid::drawDensity() {
     for (int z = 0; z < N; ++z) {
         for (int y = 0; y < N; ++y) {
             for (int x = 0; x < N; ++x) {
+                m_ParticlePosition = glm::vec3(x, y, z);
+
                 int index = IX(x, y, z);
                 float d = m_Density[index];
-                auto color = getColorByValue(std::fmod((d + 50), 255.0f),
-                                             100 / 255.0f, d / 255.0f);
                 int colorIndex = index * 3;
-                m_Colors[colorIndex + 0] = color.r;
-                m_Colors[colorIndex + 1] = color.g;
-                m_Colors[colorIndex + 2] = color.b;
+                m_Colors[colorIndex + 0] = d;
+                m_Colors[colorIndex + 1] = d;
+                m_Colors[colorIndex + 2] = d;
             }
         }
     }
@@ -72,6 +71,12 @@ void Fluid::run() {
     };
     uniforms["uModel"] = [this](std::shared_ptr<Shader> shader) {
         shader->setUniformMat4f("uModel", m_ModelMatrix);
+    };
+    uniforms["uWorldParticlePosition"] = [this](
+                                             std::shared_ptr<Shader> shader) {
+        glm::vec3 worldParticlePosition =
+            glm::vec3(m_ModelMatrix * glm::vec4(m_ParticlePosition, 1.0f));
+        shader->setUniform3f("uWorldParticlePosition", worldParticlePosition);
     };
 
     m_Mesh->setUniforms(uniforms);

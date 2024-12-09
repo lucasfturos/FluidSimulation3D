@@ -2,7 +2,6 @@
 
 #include "ControlPanel/control_panel.hpp"
 #include "Fluid/fluid.hpp"
-#include "Objects/objects.hpp"
 
 #include "imgui_impl_opengl3.h"
 #include "imgui_impl_sdl2.h"
@@ -24,7 +23,7 @@ class Render {
         glm::lookAt(glm::vec3(0.0f, 2.0f, 20.0f), glm::vec3(0.0f, 0.0f, 0.0f),
                     glm::vec3(0.0f, 1.0f, 0.0f));
     const glm::mat4 projDefaultMat =
-        glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.1f, 100.0f);
+        glm::perspective(glm::radians(45.0f), 16.0f / 9.0f, 0.1f, 150.0f);
 
   private:
     SDL_Window *window;

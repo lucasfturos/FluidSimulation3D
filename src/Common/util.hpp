@@ -9,6 +9,7 @@ struct SimulationParams {
     bool activeGravity;
     float gravityScale;
     bool flowPaused;
+    bool collisionDetection;
 };
 
 enum class ObjectType {

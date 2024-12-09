@@ -112,3 +112,52 @@ void Fluid::fadeDensity() {
         m_Density[i] = std::max(m_Density[i] - fadeRate, 0.0f);
     }
 }
+
+bool Fluid::checkCollisionObject(const glm::vec3 &particlePosition,
+                                     const std::shared_ptr<Objects> &obj) {
+    glm::vec3 objectPosition = obj->getPosition();
+
+    switch (obj->getObjectType()) {
+    case ObjectType::Sphere: {
+        float radius = obj->getSphere()->getRadius();
+        float distance = glm::length(particlePosition - objectPosition);
+        return distance < radius;
+    }
+    default:
+        return false;
+    }
+}
+
+void Fluid::applyCollisionResponse(glm::ivec3 particlePos,
+                                   const glm::vec3 &objectPosition,
+                                   const std::shared_ptr<Objects> &obj) {
+    int index = IX(particlePos.x, particlePos.y, particlePos.z);
+
+    switch (obj->getObjectType()) {
+    case ObjectType::Sphere: {
+        float radius = obj->getSphere()->getRadius();
+        float distance = glm::length(glm::vec3(particlePos) - objectPosition);
+
+        if (distance < radius) {
+            float force = (radius - distance) * 0.5f;
+            glm::vec3 direction =
+                glm::normalize(glm::vec3(particlePos) - objectPosition);
+            m_Vx[index] = force * direction.x;
+            m_Vy[index] = force * direction.y;
+            m_Vz[index] = force * direction.z;
+        }
+        break;
+    }
+    default:
+        break;
+    }
+}
+
+void Fluid::detectCollisions(const std::shared_ptr<Objects> &obj) {
+    if (!m_SimulParams.collisionDetection)
+        return;
+    if (checkCollisionObject(m_ParticlePosition, obj)) {
+        std::cout << "Colision\n";
+        applyCollisionResponse(m_ParticlePosition, obj->getPosition(), obj);
+    }
+}
